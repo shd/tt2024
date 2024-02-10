@@ -292,7 +292,11 @@ Church, A. (1935). “A Proof of Freedom from Contradiction.” Proceedings of t
 Church, A. (1936). “An Unsolvable Problem of Elementary Number Theory.” American Journal of Mathematics, 58(2):345–363, 1936.
 \item Начала современного понимания теории типов были заложены в этой работе:
 Church, A. (1940). A formulation of the simple theory of types, Journal of Symbolic Logic 5, pp. 56–68.
-\item Мы начнём с краткого повторения просто-типизированного лямбда-исчисления.
+\item Применение типов в лямбда-исчислении позволяет достичь схожих результатов с Principa Mathematica: 
+синтаксическое ограничение допустимых формул, исключение части формул из исчисления.
+Мы начнём с краткого повторения просто-типизированного лямбда-исчисления и покажем невыразимость в нём Y-комбинатора.
+%\item Впоследствии мы докажем, что просто-типизированное лямбда-исчисление сильно нормализуемо --- 
+%у любой формулы есть нормальная форма, и отсутствует возможность для бесконечной редукции формул. 
 \end{itemize}
 \end{frame}
 
@@ -458,6 +462,7 @@ $$\infer{\Gamma, \varphi \vdash \varphi}{}$$
 		\[
 		\infer{\Gamma \vdash PQ : \psi}{\Gamma \vdash P : \varphi \to \psi && \Gamma \vdash Q : \varphi}
 		\]
+        Мы допускаем в исчислении только те лямбда-выражения, которые имеют тип.
 \end{frame}
 
 \begin{frame}{Пример}
