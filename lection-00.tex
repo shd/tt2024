@@ -1,0 +1,629 @@
+\documentclass[aspectratio=169]{beamer}
+\usepackage{graphicx}
+\usepackage{stmaryrd}
+\usepackage[T1,T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{verbatim}
+\usepackage{amsthm}
+%\usepackage{bnf}
+\usepackage{tikz}
+\usepackage{enumerate}
+\usepackage{mathtext}
+\usepackage{mathtools}
+\usepackage{mathabx}
+%\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
+\usepackage{proof}
+%\usepackage{paracol}
+%\usepackage{enumitem}
+\usepackage{color}
+\usepackage{colortbl}
+%\usepackage{minted}
+%\usepackage{hyperref}
+\setbeamertemplate{navigation symbols}{}
+\usetikzlibrary{graphs}
+\usetikzlibrary{graphs.standard}
+\usetikzlibrary{automata,positioning}
+\usepackage{float}
+
+\begin{document}
+
+%\theoremstyle{dfn}
+\newtheorem{dfn}{Определение}[section]
+\newtheorem{nte}{Замечание}[section]
+
+\newtheorem{axiom}{Аксиома}[section]
+\newtheorem{thm}{Теорема}[section]
+\newtheorem{lmm}[theorem]{Лемма}
+\newtheorem{statement}{Утверждение}[section]
+\newtheorem{oun_paragraph}{Пункт}[section]
+\newtheorem{cons}{Следствие}[section]
+\newtheorem*{exm}{Пример}
+
+\newcommand{\comb}[1]{\operatorname{\mathcal{#1}}}
+\newcommand{\func}[1]{\operatorname{#1}}
+\newcommand{\reduction}[1]{{\color{OrangeRed}#1}}
+\newcommand{\set}[1]{\left\{#1\right\}}
+
+\def\from#1{\par \parbox{0.7\textwidth}{\par \hfill\raggedleft \it #1}} 
+
+\begin{frame}{}
+\begin{center}
+{\LARGE Теория типов}\\\vspace{1cm}
+О курсе
+\end{center}
+\end{frame}
+
+\begin{frame}{Краткое содержание вступительного занятия}
+\begin{enumerate}
+\item История вопроса: что вообще изучает теория типов, типы в математике, типы в лямбда-исчислении.
+Краткое повторение материала, знание которого ожидается от участников.
+\item Содержание текущего курса: изоморфизм Карри-Ховарда и его применение в программировании и математике
+\item Особенности преподавания.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Типы в математике}
+\begin{itemize}
+\item Раздел не претендует на полноту, предназначен для построения контекста.
+\item Парадокс Рассела: $\{\ x\ |\ x \notin x\ \}$. Напрашивается вопрос: разве эта запись законна?
+$a \in b$ --- ожидаем, что слева элемент, а справа множество. %Интуитивно хочется такие ситуации запретить.
+\item A. N. Whitehead, B. Russel, Principa Mathematica (Cambridge University Press, 1910-1913) --- один из первых 
+примеров формализации математики в рамках программы Гильберта, включает запрет таких записей с помощью введения типов.
+Всем пропозициональным функциям (<<предикатам>>) теории присваиваем тип --- и определяем правила построения
+формул с учётом типов. 
+%Типы %ограничивают возможные выражения синтаксически --- в том числе 
+%синтаксически запрещают парадоксальные записи.
+\item По силе P.M. примерно соответствует аксиоматике Цермело, но менее удобна из-за явных типов. 
+Аксиоматика ZFC явных типов не имеет,
+но позволяет приписать множествам схожую характеристику (<<ранг>>).
+В ZFC также невозможны множества вида $\{\ x\ |\ x \notin x\ \}$, хотя запрет не формулируется синтаксически.
+\item Не пытаясь охватить всю тему про типы, сконцентрируемся только на типах в лямбда-исчислении.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Лямбда-исчисление: история возникновения}
+
+\begin{itemize}
+\item Готлоб Фреге, 1893 год, <<карринг>>. Двуместную функцию $a + b$ 
+можно представить как композицию двух одноместных функций: $$f(a) = \lambda x. a + x\quad\quad a + b = f(a)(b)$$
+\item Моисей Шейнфинкель, 1924, комбинаторы: $$Kab = a\quad\quad Sabc = ac(bc)$$
+\item Алонзо Чёрч, 1932, лямбда-исчисление: $$(\lambda x.M) = M[x := N]$$
+\item Алонзо Чёрч, 1932, 1934:
+формальная арифметика сложна (8 аксиом + схема аксиом индукции, исчисление предикатов...). 
+В $\lambda$-исчислении арифметика выражается естественно. Попробуем $\lambda$-исчисление
+расширить до логики?
+\item С.Клини и Б.Россер, 1935, противоречие (модификация парадокса Ришара).
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Краткое изложение формализма, напоминание}
+
+$$\Lambda ::= (\lambda x.\Lambda) | (\Lambda\ \Lambda) | x$$
+
+Мета-язык: 
+\begin{itemize}
+\item Мета-переменные:\begin{itemize}
+\item $A\dots Z$ --- мета-переменные для термов. 
+\item $x,y,z$ --- мета-переменные для переменных. 
+\end{itemize}
+
+\item Правила расстановки скобок аналогичны правилам для кванторов:
+\begin{itemize}
+\item Лямбда-выражение ест всё до конца строки
+\item Аппликация левоассоциативна
+\end{itemize}
+\end{itemize}
+
+\begin{exm}
+\begin{itemize}
+\item $a\ b\ c\ (\lambda d.e\ f\ \lambda g.h)\ i \equiv \Big({\color{red}\Big(}((a\ b)\ c)\ {\color{blue}\Big(}\lambda d.((e\ f)\ (\lambda g.h)){\color{blue}\Big)}{\color{red}\Big)}\ i\Big)$
+\item $0 := \lambda f.\lambda x.x;\quad(+1) := \lambda n.\lambda f.\lambda x.n\ f\ (f\ x);\quad(+2) := \lambda x.(+1)\ ((+1)\ x)$
+\end{itemize}
+\end{exm}
+\end{frame}
+
+\begin{comment}
+\begin{frame}{Альфа-эквивалентность}
+$$FV(A) = \left\{\begin{array}{ll} \{x\}, & A \equiv x\\
+  FV(P)\cup FV(Q), & A \equiv P\ Q\\
+  FV(P)\setminus\{x\}, & A \equiv \lambda x.P\end{array}\right.$$
+
+Примеры: 
+\begin{itemize}
+\item $M := \lambda b.\lambda c.a\ c\ (b\ c)$; $FV(M) = \{a\}$
+\item $N := x\ (\lambda x.(x\ (\lambda y.x)))$; $FV(N) = \{x\}$
+\end{itemize}
+
+\begin{dfn}$A=_\alpha B$, если и только если выполнено одно из трёх:
+\begin{enumerate}
+\item $A \equiv x$, $B \equiv y$, $x \equiv y$;
+\item $A \equiv P_a Q_a$, $B \equiv P_b Q_b$ и $P_a =_\alpha P_b$, $Q_a =_\alpha Q_b$;
+\item $A \equiv (\lambda x.P)$, $B \equiv (\lambda y.Q)$, $P[x := t] =_\alpha Q[y := t]$, где $t$ не входит в $A$ и $B$.
+\end{enumerate}\end{dfn}
+
+\begin{dfn}$L = \Lambda/=_\alpha$\end{dfn}
+\end{frame}
+\end{comment}
+
+\begin{frame}{Альфа-эквивалентность}
+\begin{enumerate}
+\item $A \equiv x$, $B \equiv y$, $x \equiv y$;
+\item $A \equiv P_a Q_a$, $B \equiv P_b Q_b$ и $P_a =_\alpha P_b$, $Q_a =_\alpha Q_b$;
+\item $A \equiv (\lambda x.P)$, $B \equiv (\lambda y.Q)$, $P[x := t] =_\alpha Q[y := t]$, где $t$ не входит в $A$ и $B$.
+\end{enumerate}\vspace{-0.2cm}\begin{lmm}\vspace{-0.3cm}
+$$\lambda a.\lambda b.a\ b =_\alpha \lambda b.\lambda a.b\ a$$\vspace{-0.3cm}
+\end{lmm}\vspace{-0.3cm}
+\begin{proof}
+\begin{center}\begin{tabular}{rcll}
+  $t$ & $=_\alpha$ &$t$& Правило 1\\
+  $s$ & $=_\alpha$ &$s$& Правило 1\\
+  $t\ s$ & $=_\alpha$ &$t\ s$& Правило 2\\
+  $\lambda b.(t\ b)$ & $=_\alpha$ &$\lambda a.(t\ a)$ & Правило 3\\
+  $\lambda a.\lambda b.(a\ b)$ & $=_\alpha$ &$\lambda b.\lambda a.(b\ a)$ & Правило 3\\
+\end{tabular}\end{center}\vspace{-0.3cm}
+\end{proof}
+\end{frame}
+
+\begin{frame}{Бета-редукция}
+%Интуиция: вызов функции.
+%\begin{center}\begin{tabular}{l|l}
+%$\lambda$-выражение & Python \\\hline
+%$\lambda f.\lambda x.f\ x$ & \texttt{def one(f,x): return f(x)}\\
+%$(\lambda x.x\ x)\ (\lambda x.x\ x)$ & \texttt{(lambda x: x x) (lambda x: x x)}\\
+% &   \texttt{def omega(x): return x(x); omega(omega)}
+%\end{tabular}\end{center}
+
+%\pause
+\begin{dfn} Терм вида $(\lambda x.P)\ Q$ --- бета-редекс.\end{dfn}
+\begin{dfn} $A \rightarrow_\beta B$, если:
+\begin{enumerate}
+\item $A \equiv (\lambda x.P)\ Q$, $B \equiv P\ [x := Q]$, при условии свободы для подстановки;
+\item $A \equiv (P\ Q)$, $B \equiv (P'\ Q')$, при этом $P \rightarrow_\beta P'$ и $Q = Q'$, либо $P = P'$ и $Q \rightarrow_\beta Q'$;
+\item $A \equiv (\lambda x.P)$, $B \equiv (\lambda x.P')$, и $P \rightarrow_\beta P'$.
+\end{enumerate}
+\end{dfn}%\end{frame}
+
+%\begin{frame}{Бета-редукция, пример}
+\begin{exm}
+$(\lambda x.x\ x)\ (\lambda n.n) \rightarrow_\beta (\lambda n.n)\ (\lambda n.n) \rightarrow_\beta \lambda n.n$
+\end{exm}
+\begin{exm}
+$(\lambda x.x\ x)\ (\lambda x.x\ x) \rightarrow_\beta (\lambda x.x\ x)\ (\lambda x.x\ x)$
+\end{exm}
+\end{frame}
+
+%\begin{frame}{Нормальная форма}
+%\begin{dfn}Лямбда-терм $N$ находится в нормальной форме, если нет $Q$: $N \rightarrow_\beta Q$.\end{dfn}
+%\begin{exm}В нормальной форме:\\
+%$\lambda f.\lambda x.x\ (f\ (f\ \lambda g.x))$\end{exm}\pause
+%\begin{exm}Не в нормальной форме (редексы подчёркнуты):\\
+%$\lambda f.\lambda x.\underline{(\lambda g.x)\ (f\ (f\ x))}$\\
+%$(\underline{(\lambda x.x)\ (\lambda x.x)})\ (\underline{(\lambda x.x)\ (\lambda x.x)})$
+%\end{exm}
+%\begin{dfn}$(\twoheadrightarrow_\beta)$ --- транзитивное и рефлексивное замыкание $(\rightarrow_\beta)$.\end{dfn}
+%\end{frame}
+
+%\end{frame}
+
+\begin{frame}{Бета-эквивалентность, неподвижная точка}
+%\begin{exm}$\Omega = (\lambda x.x\ x)\ (\lambda x.x\ x)$ не имеет нормальной формы:
+%$\Omega \rightarrow_\beta \Omega$\end{exm}
+\begin{dfn}$(=_\beta)$ --- транзитивное, рефлексивное и симметричное замыкание $(\rightarrow_\beta)$.\end{dfn}
+
+\begin{thm}[следствие из теоремы Чёрча-Россера]
+Если $A =_\beta B$, то найдётся $C$, что $A \twoheadrightarrow_\beta C$ и $B \twoheadrightarrow_\beta C$.
+\end{thm}
+То есть, можно интуитивно воспринимать $A =_\beta B$ как вычислительное равенство, равенство результатов.
+
+\begin{thm}Для любого терма $N$ найдётся такой терм $R$, что $R =_\beta N\ R$.\end{thm}
+\begin{proof}Пусть $Y = \lambda f.(\lambda x.f\ (x\ x))\ (\lambda x.f\ (x\ x))$.
+Тогда $R := Y\ N$:
+
+$$Y\ N =_\beta (\lambda x.N\ ({\color{red}x}\ {\color{blue}x}))\ (\lambda x.N\ (x\ x)) =_\beta N\ ({\color{red}(\lambda x.N\ (x\ x)})\ ({\color{blue}\lambda x.N\ (x\ x)}))$$
+\end{proof}
+\end{frame}
+%\end{comment}
+
+\begin{frame}{Подробнее о лямбда-исчислении как логике}
+
+<<Анахроническое>> изложение, пересказ современным языком.
+\begin{itemize}
+\item В лямбда-исчисление введём логический символ $\rightarrow$. Все формулы исчисления будем считать
+логическими высказываниями.
+Добавим логические аксиомы.
+
+Ожидаем такое: $\vdash 0+1 = 1$
+
+\item Получение противоречия: определим минимальные требования к исчислению. 
+Очевидно, хотя бы следующее мы должны уметь доказывать:
+
+\begin{enumerate}
+	\item $\vdash A \rightarrow A$
+	\item $\vdash (A \rightarrow (A \rightarrow B)) \rightarrow (A \rightarrow B)$
+	\item Если $\vdash A$ и $\vdash A \rightarrow B$, то $\vdash B$.
+\end{enumerate}
+
+\item Менее очевидное: $\vdash A \rightarrow B$, если $A =_{\beta} B$. Мотивация: если $0+1 =_\beta 1$, то
+$X(0+1)$ всегда можно заменить на $X(1)$, следует из определения равенства по Лейбницу.
+
+\item Заметим: $0+1 \twoheadrightarrow_\beta 1$, поэтому $\vdash (1 =1) \rightarrow (0+1 = 1)$.
+Из чего уже видны возможные контуры исчисления.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Парадокс Карри}
+
+$\Phi_{\alpha} := Y\;(\lambda x.x \rightarrow \alpha)$
+
+Редуцируя $\Phi_{\alpha}$, получаем:
+
+%\begin{align*}
+$$\Phi_{\alpha}  \twoheadrightarrow_\beta (\lambda x.x \rightarrow \alpha)\;(Y\;(\lambda x.x \rightarrow \alpha)) \twoheadrightarrow_\beta\Phi_{\alpha} \rightarrow \alpha$$
+%\end{align*}
+
+И доказательство:
+
+\begin{tabular}{ll}
+	1) $\Phi_\alpha\rightarrow(\Phi_\alpha\rightarrow\alpha)$ & $(A\rightarrow A)$ и $\Phi_{\alpha} =_{\beta} \Phi_{\alpha} \rightarrow \alpha$\\
+	2) $(\Phi_\alpha\rightarrow\Phi_\alpha\rightarrow\alpha)\rightarrow(\Phi_\alpha\rightarrow\alpha)$ & Так как $(A \rightarrow (A \rightarrow B)) \rightarrow (A \rightarrow B)$\\
+	3) $\Phi_\alpha\rightarrow\alpha$ & MP 1, 2\\
+	4) $(\Phi_\alpha \rightarrow \alpha) \rightarrow \Phi_\alpha$ & $(A\rightarrow A)$ и $\Phi_\alpha \rightarrow \alpha =_{\beta} \Phi_\alpha$\\
+	5) $\Phi_\alpha$ & MP 3, 4\\
+	6) $\alpha$ & MP 5, 3
+\end{tabular}
+
+Собственно парадокс Карри: <<Если данное высказывание верно, то луна сделана из зелёного сыра>>. То есть,
+$$\Phi_\alpha \leftrightarrow (\Phi_\alpha\rightarrow\alpha)$$
+
+\end{frame}
+
+\begin{frame}{Лямбда-исчисление как вычислительная модель}
+\begin{itemize}
+\item Из исчисления А. Чёрч выделил некоторую часть и доказал её непротиворечивость:
+Church, A. (1935). “A Proof of Freedom from Contradiction.” Proceedings of the National Academy of Sciences of the United States of America, 21(5):275–281.
+\item Но затем предложил смотреть на исчисление как на вычислительную модель:
+Church, A. (1936). “An Unsolvable Problem of Elementary Number Theory.” American Journal of Mathematics, 58(2):345–363, 1936.
+\item Начала современного понимания теории типов были заложены в этой работе:
+Church, A. (1940). A formulation of the simple theory of types, Journal of Symbolic Logic 5, pp. 56–68.
+\item Мы начнём с краткого повторения просто-типизированного лямбда-исчисления.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Импликационный фрагмент ИИВ}
+
+Рассмотрим подмножество ИИВ, со следующей грамматикой:
+
+$\Phi ::= x \; | \; \Phi \rightarrow \Phi \; | \; (\Phi)$
+
+Добавим в него схему аксиом
+
+$$\infer{\Gamma, \varphi \vdash \varphi}{}$$
+
+	Правило введения импликации:
+	\[
+	\infer{\Gamma \vdash \varphi \to \psi}{\Gamma, \varphi \vdash \psi}
+	\]
+
+	Правило удаления импликации:
+	\[
+	\infer{\Gamma \vdash \psi}{\Gamma \vdash \varphi \to \psi && \Gamma \vdash \varphi}
+	\]
+
+\begin{theorem}	
+	Если $\Gamma$ и $\varphi$ состоят только из импликаций, то $\Gamma \vdash \varphi$ равносильна $\Gamma \vdash_\rightarrow \varphi$.
+\end{theorem}
+\end{frame}
+
+\begin{frame}{Пример}
+\begin{exm}
+	Докажем $\vdash \varphi \rightarrow \psi \rightarrow \varphi$
+	
+	\[
+	\infer[(\text{Введение импликации})]
+	{ \vdash \varphi \to (\psi \to \varphi) }
+	{ \infer[(\text{Введение импликации})]
+		{ \varphi \vdash \psi \to \varphi }
+		{\varphi, \psi \vdash \varphi}
+	}
+	\]
+\end{exm}
+
+\begin{exm}
+	Докажем $\alpha \rightarrow \beta \rightarrow \gamma, \; \alpha, \; \beta \vdash \gamma$
+	
+	\[
+	\infer
+	{ \alpha \rightarrow \beta \rightarrow \gamma, \; \alpha, \; \beta \vdash \gamma}{\infer
+		{\alpha \rightarrow \beta \rightarrow \gamma, \; \alpha, \; \beta \vdash \beta \rightarrow \gamma }{\alpha \rightarrow \beta \rightarrow \gamma, \; \alpha, \; \beta \vdash \alpha \rightarrow \beta \rightarrow \gamma && \alpha \rightarrow \beta \rightarrow \gamma, \; \alpha, \; \beta \vdash \alpha} && \alpha \rightarrow \beta \rightarrow \gamma, \alpha, \; \beta \vdash \beta}
+	\]
+	
+\end{exm}
+
+%\begin{note}
+%	В дальнейшем символом $\vdash_\rightarrow$ будем обозначать доказуемость в импликационном фрагменте.
+%\end{note}
+\end{frame}
+
+\begin{comment}
+\begin{frame}{Замкнутость И.Ф.ИИВ}
+
+\begin{lemma}
+	\label{conj}
+	Если $\Gamma \vdash \varphi$, то в любой модели Крипке из $\Vdash \Gamma$ следует $\Vdash \varphi$
+\end{lemma}
+\begin{proof}
+	Пусть $\Gamma \vdash \varphi$. 
+	Тогда $\vdash \& \Gamma \rightarrow \varphi$, где $\& \Gamma$ --- конъюнкция всех утверждений в $\Gamma$.
+	По корректности моделей Крипке, будет выполнено $\Vdash \& \Gamma \rightarrow \varphi$. Переписывая $\&$ и $\rightarrow$ по определению, получаем $\Vdash \Gamma \ \Rightarrow \ \Vdash \varphi$.
+\end{proof}
+\end{frame}
+
+\begin{frame}{Замкнутость И.Ф.ИИВ}
+\begin{theorem}
+	\label{kripke}
+	$\Gamma \vdash_\rightarrow \varphi$ т.и.т.т. в любой модели Крипке из $\Vdash \Gamma$ следует $\Vdash \varphi$
+\end{theorem}
+\begin{proof}\
+	\begin{itemize}
+		\item $(\Rightarrow)$ Очевидно по лемме \ref{conj}.
+		\item $(\Leftarrow)$ Пусть в любой модели Крипке из $\Vdash \Gamma$ следует $\Vdash \varphi$. Докажем $\Gamma \vdash_\rightarrow \varphi$.
+		
+		Выберем подходящую модель Крипке. Напомним, что моделью Крипке называется тройка $\langle C, \succcurlyeq, \Vdash\rangle$, где $C$ -- множество миров, $\succcurlyeq$ -- отношение частичного порядка на $C$, $\Vdash$ -- отношение вынужденности переменной.
+		
+		\textbf{Построим модель Крипке} $\mathcal C = \langle C, \succcurlyeq, \Vdash \rangle$. 
+		
+		Пусть $C = \{\Delta \ |\ \Gamma \subseteq \Delta, \Delta \text{ замкнут относительно }\vdash_\rightarrow\}$. $\Delta$ замкнут относительно доказуемости, когда для любого $\varphi$ если $\Delta \vdash_\rightarrow \varphi$, то $\varphi \in \Delta$.
+		
+		$C_1 \succcurlyeq C_2$, если $C_1 \supseteq C_2$.
+		
+		$\Delta \Vdash \alpha$, если $\alpha \in \Delta$, $\alpha$ -- переменная.		
+	\end{itemize}
+\end{proof}
+\end{frame}
+
+\begin{frame}{Лемма: В модели $\mathcal C$ $\Delta \Vdash \varphi$ т.и.т.т. $\varphi \in \Delta$}
+			\textbf{База.} $\varphi \equiv \alpha$. $\Delta \Vdash \alpha \Leftrightarrow \alpha \in \Delta$ следует из определения вынужденности.
+			
+			\textbf{Индукционный переход.} $\varphi \equiv \psi \rightarrow \sigma$
+			
+			Индукционное предположение:
+			$\forall \Delta \in C: \Delta \Vdash \psi \Leftrightarrow \psi \in \Delta$, $\Delta \Vdash \sigma \Leftrightarrow \sigma \in \Delta$.
+			
+			Докажем, что $\Delta \Vdash \psi \rightarrow \sigma \Leftrightarrow \psi \rightarrow \sigma \in \Delta$.
+				
+\end{frame}
+
+\begin{frame}{}
+				$(\Rightarrow)$ Пусть $\Delta \Vdash \psi \rightarrow \sigma$.
+				
+				Рассмотрим мир $\Pi = (\Delta \cup \{\psi\})^*$. $\Pi \Vdash \psi \rightarrow \sigma$, т.к. $\Delta \preccurlyeq \Pi$.
+				
+				$\psi \in \Pi$. Тогда, по инд. пред., $\Pi \Vdash \psi$. Значит, $\Pi \Vdash \sigma$. В самом деле, из определения вынужденности импликации в $\Pi$ следует, что если $\Pi \Vdash \psi$, то $\Pi \Vdash \sigma$.
+				
+				По инд. пред. заключаем $\sigma \in \Pi$, т.е. $\Pi \vdash_\rightarrow \sigma$, т.к. $\Pi$ -- замкнут по доказуемости. Ясно, что $\Delta, \psi \vdash_\rightarrow \sigma$. Действительно, в гипотезах доказательства $\Pi \vdash_\rightarrow \sigma$ использовалось не все бесконечное множество $\Pi$, а лишь конечный набор утверждений из него. Каждое такое утверждение выводится из $\Delta, \psi$, потому что $\Pi$ - замыкание $\Delta \cup \{\psi\}$. 
+				
+				Из $\Delta, \psi \vdash_\rightarrow \sigma$ следует $\Delta \vdash_\rightarrow \psi \rightarrow \sigma$. Таким образом, $\psi \rightarrow \sigma \in \Delta$.
+\end{frame}
+
+\begin{frame}{}
+				$(\Leftarrow)$ Пусть $\psi \rightarrow \sigma \in \Delta$.
+				
+				Рассмотрим произвольный мир $\Pi: \Delta \preccurlyeq \Pi \land \Pi \Vdash \psi$. По инд. пред. $\psi \in \Pi$. $\psi \rightarrow \sigma \in \Pi$, т.к. $\Delta \subseteq \Pi$. $\Pi \vdash_\rightarrow \psi$, $\Pi \vdash_\rightarrow \psi \rightarrow \sigma$. Очевидно, $\Pi \vdash_\rightarrow \sigma$. $\sigma \in \Pi$. Тогда, по инд. пред., $\Pi \Vdash \sigma$. Таким образом, $\Pi \Vdash \psi \rightarrow \sigma$, а следовательно, $\Delta \Vdash \psi \rightarrow \sigma$.
+\end{frame}
+
+\begin{frame}{Завершение доказательства}
+Теперь можем доказать теорему о замкнутости ИФИИВ.
+\begin{proof}
+	Следствие $\Gamma \vdash_\rightarrow \varphi \ \Rightarrow \ \Gamma \vdash \varphi$ очевидно.\\
+	Пусть $\Gamma \vdash \varphi$. По \ref{conj} получаем, что в любой модели Крипке из $\Vdash \Gamma$ следует $\Vdash \varphi$. Отсюда, по теореме \ref{kripke}, доказывается $\Gamma \vdash_\rightarrow \varphi$.
+\end{proof}
+\end{frame}
+\end{comment}
+
+\begin{frame}{Просто типизированное по Карри $\lambda$-исчисление}
+
+\begin{dfn}
+	Тип в просто типизированном $\lambda$-исчислении по Карри --- это либо маленькая греческая буква ($\alpha, \phi, \theta, \ldots$), либо импликация ($\theta_1 \rightarrow \theta_2$)
+	
+	Таким образом, $\Theta ::= \theta_{i} | (\Theta \rightarrow \Theta)$
+	
+	Импликация при этом считается правоассоциативной операцией.
+\end{dfn}
+
+\begin{dfn}
+	Язык просто типизированного $\lambda$-исчисления --- это язык бестипового $\lambda$-исчисления.
+\end{dfn}
+
+\begin{dfn}
+	Контекст $\Gamma$ --- это список выражений вида $A: \theta$, где $A$ --- $\lambda$-терм, а $\theta$ --- тип.
+\end{dfn}
+\end{frame}
+
+\begin{frame}{Исчисление по Карри}
+	Аксиома
+	$$\infer[\text{если } x \text{ не входит в } \Gamma]{\Gamma, x : \theta \vdash x : \theta}{}$$
+	
+		Правило типизации абстракции
+		\[
+		\infer[\text{если } x \text{ не входит в } \Gamma]{\Gamma \vdash (\lambda \; x. \; P) : \varphi \rightarrow \psi}{\Gamma, x : \varphi \vdash P : \psi}
+		\]
+		Правило типизации аппликации:
+		\[
+		\infer{\Gamma \vdash PQ : \psi}{\Gamma \vdash P : \varphi \to \psi && \Gamma \vdash Q : \varphi}
+		\]
+\end{frame}
+
+\begin{frame}{Пример}
+	Докажем $\vdash \lambda \; x. \; \lambda \; y. \; x : \alpha \rightarrow \beta \rightarrow \alpha$
+	
+	\[
+	\infer[(\text{Правило типизации абстракции})]
+	{ \vdash \lambda \; x. \; \lambda \; y. \; x : \alpha \rightarrow \beta \rightarrow \alpha }
+	{ \infer[(\text{Правило типизации абстракции})]
+		{x: \alpha \vdash \lambda \; y. \; x : \beta \rightarrow \alpha}
+		{x: \alpha, y : \beta \vdash x : \alpha}
+	}
+	\]
+\end{frame}
+
+\begin{frame}{Пример}
+	Докажем $\vdash \lambda \; x. \; \lambda \; y. \; x \; y : (\alpha \rightarrow \beta) \rightarrow \alpha \rightarrow \beta$
+	
+	\[
+	\infer
+	{\vdash \lambda \; x. \; \lambda \; y. \; x \; y : (\alpha \rightarrow \beta) \rightarrow \alpha \rightarrow \beta}
+	{
+		\infer
+		{x: \alpha \rightarrow \beta \vdash \lambda \; y. \; x \; y : \alpha \rightarrow \beta}
+		{
+			\infer
+			{x: \alpha \rightarrow \beta, y : \alpha \vdash x \; y : \beta}
+			{x: \alpha \rightarrow \beta, y : \alpha \vdash x: \alpha \rightarrow \beta && x: \alpha \rightarrow \beta, y : \alpha \vdash y: \alpha}
+		}
+	}
+	\]
+\end{frame}
+
+\begin{frame}{Отсутствие типа у Y-комбинатора}
+
+\begin{thm}
+	$Y$-комбинатор не типизируется в просто типизированном по Карри $\lambda$-исчислении.
+\end{thm}
+
+%$Y \; f =_{\beta} f \; (Y \; f)$, поэтому $Y \; f$ и $f \; (Y \; f)$ должны иметь одинаковые типы.
+
+%Пусть $Y \; f : \alpha$
+
+%Тогда $Y : \beta \rightarrow \alpha, f : \beta$
+
+%Из $f \; (Y \; f) : \alpha$ получаем $f: a \rightarrow \alpha$ (так как $Y f : \alpha$)
+
+%Тогда $\beta = \alpha \rightarrow \alpha$, из этого получаем $Y : (\alpha \rightarrow \alpha) \rightarrow \alpha$
+
+%Можно доказать, что $\lambda \; x. \; x : \alpha \rightarrow \alpha$. Тогда $Y \; \lambda \; x. \; x : \alpha$, то есть любой тип является обитаемым. Так как это невозможно, $Y$-комбинатор не может иметь типа, так как тогда он сделает нашу логику противоречивой.
+
+%\subparagraph{Формальное доказательство}
+
+Докажем от противного. Есть вывод типа выражения $x \; x$. Единственный вариант типизации:
+
+$$\infer{\Gamma \vdash x x: \psi}{\Gamma \vdash x: \varphi \rightarrow \psi && \Gamma \vdash x: \varphi }$$
+
+Рассмотрим типизацию $\Gamma \vdash x: \varphi \rightarrow \psi$ и $\Gamma \vdash x: \varphi$. 
+$x$ типизируется неизбежно следующим образом.
+
+$$\infer{\Gamma', x: \varphi \rightarrow \psi, x: \varphi \vdash x x: \psi}{\Gamma', x: \varphi \rightarrow \psi, x: \varphi \vdash x: \varphi \rightarrow \psi && \Gamma', x: \varphi \rightarrow \psi, x: \varphi \vdash x: \varphi }$$
+
+В $\Gamma$ переменная $x$ встречается два раза.
+\end{frame}
+
+\begin{frame}{Изоморфизм Карри-Ховарда}
+
+\begin{tabular}{ | p{7cm} | p{7cm} | }
+	\hline
+	Просто типизированное $\lambda$-исчисление & Импликативный фрагмент ИИВ \\ \hline
+	$\Gamma, x : \theta \vdash x : \theta$ & $\Gamma, \varphi \vdash \varphi$ \\
+	&\\
+	$\infer{\Gamma \vdash (\lambda \; x. \; P) : \varphi \rightarrow \psi}{\Gamma, x : \varphi \vdash P : \psi}$ & $\infer{\Gamma \vdash \varphi \to \psi}{\Gamma, \varphi \vdash \psi}$  \\
+	&\\
+	$\infer{\Gamma \vdash PQ : \psi}{\Gamma \vdash P : \varphi \to \psi && \Gamma \vdash Q : \varphi}$ & $\infer{\Gamma \vdash \psi}{\Gamma \vdash \varphi \to \psi && \Gamma \vdash \varphi}$ \\
+	\hline
+\end{tabular}
+
+$\newline$
+\begin{tabular}{ | p{7cm} | p{7cm} | }
+	\hline
+	Просто типизированное $\lambda$-исчисление & Импликативный фрагмент ИИВ \\ \hline
+	Тип & Высказывание \\
+	Терм & Доказательство высказывания  \\
+	Проверка типа & Проверка доказательства на корректность \\
+	Обитаемый тип & Доказуемое высказывание \\
+	\hline
+\end{tabular}
+
+\end{frame}
+
+\begin{frame}{Часть 2. Анонс содержания курса}
+\begin{itemize}
+\item Формальный материал до этого момента должен быть всем знаком --- 
+выше были соображения по поводу истории вопроса и напоминание общих определений. Если встретилось 
+что-то неизвестное, задавайте вопросы сами.
+\item С этого момента начнётся нечто новое, сейчас будут анонсированы основные темы курса.
+\item Курс строится вокруг изоморфизма Карри-Ховарда --- изоморфизма между матлогом и лямбда-исчислением.
+Он состоит из обсуждения двух частей: что мы можем получить из матлога для программирования, 
+и что можем получить для матлога из программирования.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{$(\Rightarrow)$: изучение языков программирования}
+\begin{itemize}
+\item Малая выразительная сила просто-типизированного лямбда исчисления (полиномы).
+\item Добавим дополнительные конструкции (например, кванторы).
+\item Логика первого порядка: зависимые типы.
+Какой тип у \verb!sprintf!?
+\begin{center}
+\begin{verbatim} 
+sprintf "%d" : int -> string
+sprintf "%d + %d" : int*int -> string
+\end{verbatim}
+\end{center}
+
+Например, Идрис позволяет тип выписать.
+
+\item Логика второго порядка: генерики.
+
+\begin{center}
+\begin{tabular}{l|l}
+Программа & Доказывает\\\hline
+\verb!let id x = x! & $\forall x.x \rightarrow x$
+\end{tabular}\end{center}
+
+\item Классические функциональные языки --- типовая система Хиндли-Милнера 
+(разрешимый вариант системы F, соответствующей логике второго порядка).
+
+\item Алгоритмы вывода типов, анализ и верификация программ --- используют матлог.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{$(\Leftarrow)$: изучение логики и доказательств через написание программ}
+\begin{itemize}
+\item Пер Мартин-Лёф, Intuonistic Type Theory: версии 1972 и 1979.
+\item Множество расширений и вариантов.
+\item Такие инструменты как Coq, Agda, Lean используют варианты этой теории.
+\item Мы будем рассматривать некоторую родственную теорию, гомотопическую теорию типов.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Гомотопическая теория типов}
+\begin{itemize}
+\item Центральный вопрос --- что такое равенство.
+\item Классический матлог: это предикат, удовлетворяющий свойствам.
+\item Однако, свойства обычно слишком общие (класс эквивалентности?). Интуитивно хочется большего,
+равенство не всегда просто эквивалентность.
+\item Изоморфизм Карри-Ховарда-Воеводского:
+\begin{tabular}{lll}
+Логика & $\lambda$-исчисление & Топология\\\hline
+Утверждение & Тип & Пространство \\
+Доказательство & Значение & Точка в пространстве\\
+Предикат $(=)$ & Зависимый тип $(=)$ & Путь между точками
+\end{tabular}
+\item Реализация: кубическая теория типов, Аренд.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Часть 3. Построение курса}
+\begin{enumerate}
+\item Аналогично с матлогом, будет разделение на теорию и практику.
+\item Теория: знание определений, идей, теорем.
+\item Практика: лабы на доказательства теорем с использованием языка Аренд, возможны дополнительные околокомпиляторные лабы.
+\item Для закрытия предмета надо набрать баллы практическими заданиями и сдать зачёт/экзамен.
+\end{enumerate}
+\end{frame}
+
+\end{document}
