@@ -1,0 +1,528 @@
+\documentclass[aspectratio=169]{beamer}
+\setbeamertemplate{navigation symbols}{}
+\usepackage{graphicx}
+\usepackage{stmaryrd}
+\usepackage[T1,T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{verbatim}
+\usepackage{amsthm}
+\usepackage{bnf}
+\usepackage{tikz}
+\usepackage{enumerate}
+\usepackage{mathtext}
+\usepackage{mathtools}
+\usepackage{mathabx}
+%\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
+\usepackage{proof}
+%\usepackage{paracol}
+%\usepackage{enumitem}
+\usepackage{color}
+\usepackage{colortbl}
+\usepackage{minted}
+%\usepackage{hyperref}
+\usetikzlibrary{graphs}
+\usetikzlibrary{graphs.standard}
+\usetikzlibrary{automata,positioning}
+\usepackage{float}
+
+\begin{document}
+
+%\theoremstyle{dfn}
+\newtheorem{dfn}{Определение}[section]
+\newtheorem{nte}{Замечание}[section]
+
+\newtheorem{axiom}{Аксиома}[section]
+\newtheorem{thm}{Теорема}[section]
+\newtheorem{lmm}[theorem]{Лемма}
+\newtheorem{statement}{Утверждение}[section]
+\newtheorem{oun_paragraph}{Пункт}[section]
+\newtheorem{cons}{Следствие}[section]
+\newtheorem*{exm}{Пример}
+
+\newcommand{\comb}[1]{\operatorname{\bf{\textrm{#1}}}}
+\newcommand{\func}[1]{\operatorname{#1}}
+\newcommand{\reduction}[1]{{\color{OrangeRed}#1}}
+\newcommand{\set}[1]{\left\{#1\right\}}
+
+\def\from#1{\par \parbox{0.7\textwidth}{\par \hfill\raggedleft \it #1}} 
+
+\begin{frame}{}
+\begin{center}\Large Лекция 1.\\ \Large Теоремы о лямбда-исчислении.\end{center}
+\end{frame}
+
+\begin{frame}{Некоторые базовые определения --- повторение}
+\begin{dfn}Пред-лямбда-терм:
+$$\Lambda ::= (\lambda x.\Lambda) | (\Lambda\ \Lambda) | x$$
+\end{dfn}
+\begin{dfn}Лямбда-терм: $\Lambda/(=_\alpha)$
+\end{dfn}
+
+\begin{dfn}$R \subseteq A \times B$ --- бинарное отношение.\\
+Запишем $aRb$, если $\langle a, b \rangle \in R$\\
+Отношение для инфиксной операции $a \star b$: $\langle a,b \rangle \in (\star)$
+\end{dfn}
+\end{frame}
+
+\begin{frame}{$\beta$-редуцируемость}
+\begin{dfn}
+	$(\twoheadrightarrow_\beta)$ --- транзитивное и рефлексивное замыкание отношения $(\rightarrow_\beta)$
+
+	А именно, будем говорить, что $A\twoheadrightarrow_{\beta}B$, если найдутся такие $X_{1}$\ldots $X_{n}$, что $A=_{\alpha}X_{1}\to_{\beta}X_{2}\to_{\beta}\ldots\to_{\beta}X_{n-1}\to_{\beta}X_{n}=_{\alpha}B$.
+\end{dfn}
+
+%$(\twoheadrightarrow_{\beta})$ "--- рефлексивное и транзитивное замыкание $(\to_{\beta})$. $(\twoheadrightarrow_{\beta})$ не обязательно приводит к нормальной форме
+\begin{exm}
+	$\Omega\twoheadrightarrow_{\beta}\Omega$
+\end{exm}
+\end{frame}
+
+\begin{frame}{}
+\begin{dfn}[Ромбовидное свойство]
+	Отношение $R$ обладает ромбовидным свойством, если для любых $a,b,c$:\\
+{\bf из} $aRb$, $aRc$, $b\neq{}c$ {\bf следует} существование $d$, что $bRd$ и $cRd$.
+\end{dfn}
+
+\begin{exm}
+	$(\leq)$ на $\mathbb{N}_0$ обладает ромбовидным свойством: $$d = max(b,c):\quad\quad\quad 2 \leq 7, 3 \leq 7 \Rightarrow d = 7$$
+
+	$(>)$ на $\mathbb{N}_0$ не обладает ромбовидным свойством: $$3 > 1, 3 > 0:\quad\quad\quad \text{нет } d: 1 > d, 0 > d$$
+\end{exm}
+\end{frame}
+
+\begin{frame}{Теорема Чёрча-Россера}
+\begin{thm}[Черча-Россера]
+	$(\twoheadrightarrow_{\beta})$ обладает ромбовидным свойством.
+\end{thm}
+
+
+\begin{cons}
+	Если у $A$ есть нормальная форма, то она единственная.
+\end{cons}
+
+\begin{proof}
+	Пусть $A\twoheadrightarrow_{\beta}B$ и $A\twoheadrightarrow_{\beta}C$. $B$, $C$ "--- нормальные формы и $B\neq_{\alpha}C$. 
+	Тогда по теореме Черча-Россера найдётся $D$: $B\twoheadrightarrow_{\beta}D$ и $C\twoheadrightarrow_{\beta}D$. Тогда $B=_{\alpha}D$ и $C=_{\alpha} D$ $\Rightarrow$ $B=_{\alpha}C$. Противоречие.
+\end{proof}
+
+\begin{lmm}
+	Если $B$ "--- нормальная форма, то не существует $Q$ такой, что $B\to_{\beta}Q$. Значит если $B\twoheadrightarrow_{\beta}Q$, то количество шагов редукции равно 0.
+\end{lmm}
+\end{frame}
+
+\begin{frame}{}
+\begin{lmm}
+	 \label{refl}
+	Если $R$ "--- обладает ромбовидным свойством, то и $R^{*}$ (транзитивное, рефлексивное замыкание $R$) им обладает.
+\end{lmm}
+
+\begin{proof}
+Две вложенных индукции.
+\end{proof}
+\end{frame}
+
+%\begin{proof}
+%    Пусть $M_1 R^{*} M_n$ и $M_1 R N_1$. Тогда существуют такие $M_2 \ldots M_{n-1}$, что $M_1 R M_2$ \ldots $M_{n-1} R M_n$.
+%	Так как $R$ обладает ромбовидным свойством, $M_1 R M_2$ и $M_1 R N_1$, то существует такое $N_2$,
+%	что $N_1 R N_2$ и $M_2 R N_2$. Аналогично, существуют такие $N_3 \ldots N_n$, что $N_{i-1} R N_{i}$ и $M_i R N_i$.
+%	Мы получили такое $N_n$, что $N_1 R^{*} N_n$ и $M_n R^{*} N_n$.
+%	
+%	Пусть теперь $M_{1,1}R^{*}M_{1,n}$ и $M_{1,1}R^{*}M_{m,1}$, то есть имеются $M_{1,2}$\ldots$M_{1,n-1}$ и $M_{2,1}$\ldots$M_{m-1,1}$,
+%	что $M_{1,i-1} R M_{1,i}$ и $M_{i-1, 1} R M_{i, 1}$.
+%	Тогда существует такое $M_{2,n}$, что $M_{2,1} R^{*} M_{2,n}$ и $M_{1,n} R^{*} M_{2,n}$.
+%	Аналогично, существуют такие $M_{3,n}\ldots M_{m,n}$, что $M_{i,1} R^{*} M_{i,n}$ и $M_{1,n} R^{*} M_{i,n}$.
+%	Тогда $M_{1,n} R^{*} M_{m,n}$ и $M_{m,1} R^{*} M_{m,n}$.
+%\end{proof}
+
+\begin{frame}{}
+\begin{lmm}
+	$(\to_{\beta})$ не обладает ромбовидным свойством.
+\end{lmm}
+
+	Пусть $A=(\lambda{}x.x x)(\comb I \comb I)$. Покажем, что в таком случае не будет выполняться ромбовидное свойство:
+	
+	\begin{figure}[ht]
+		\centering
+		\begin{tikzpicture}[->, every edge/.style={draw=black,thick}]
+		\node[label={\scriptsize\tikz\node[circle,draw]{$A$};}]     at (0,   0) (A)  {$(\lambda x . x x)(\comb I \comb I)$};
+		\node[label={135:\scriptsize\tikz\node[circle,draw]{$B$};}] at (-2, -1) (B)  {$(\comb I \comb I)(\comb I \comb I)$};
+		\node[label={45:\scriptsize\tikz\node[circle,draw]{$C$};}]  at (2,  -1) (C)  {$(\lambda x . x x)  \comb I$};
+		\node[label={180:\scriptsize\tikz\node[circle,draw]{$B1$};}]                                                       at (-3, -2) (B1) {$(\comb I \comb I)\comb I$};
+		\node[label={0:\scriptsize\tikz\node[circle,draw]{$B2$};}]                                                       at (-1, -2) (B2) {$\comb I(\comb I \comb I)$};
+		\node[label={0:\scriptsize\tikz\node[circle,draw]{$D$};}]                                                       at (0,  -3) (D)  {$\comb I \comb I$};
+		\path (A)  edge (B)
+		edge (C)
+		(B)  edge (B1)
+		edge (B2)
+		(B1) edge (D)
+		(B2) edge (D)
+		(C)  edge (D);
+		\end{tikzpicture}
+		\caption{Нет такого $D$, что $B \to_{\beta} D$ и $C \to_{\beta} D$.}
+	\end{figure}	
+\end{frame}
+
+\newcommand{\bpar}{\rightrightarrows_{\beta}}
+
+\begin{frame}{}
+\begin{dfn}[Параллельная $\beta$-редукция]
+	$A\bpar B$, если
+	\begin{enumerate}
+		\item $A=B$
+		\item $A=P_{1}\ Q_{1}$, $B=P_{2}\ Q_{2}$ и $P_{1}\bpar P_{2}$, $Q_{1}\bpar Q_{2}$
+		\item $A=\lambda{}x.P_{1}$, $B=\lambda{}x.P_{2}$ и 
+		$P_{1}\bpar P_{2}$
+		\item $A=_{\alpha}(\lambda{}x.P_1)Q_1$, $B=_{\alpha}P_2[x\coloneqq{}Q_2]$, причем $Q_2$ свободна для подстановки вместо $x$ в $P_2$ и $P_1 \bpar P_2$, $Q_1 \bpar Q_2$
+	\end{enumerate}
+\end{dfn}
+\end{frame}
+
+\begin{frame}{Лемма: если $P_{1}\bpar P_{2}$ и $Q_{1}\bpar Q_{2}$, то $P_{1}[x\coloneqq{}Q_{1}]\bpar P_{2}[x\coloneqq{}Q_{2}]$}
+%\begin{proof}[индукция по определению ($\bpar$)]
+	\begin{itemize}
+		\item Пусть $P_{1}=_{\alpha}P_{2}$. Индукция по структуре выражения.
+		\item Пусть $P_{1}\equiv{}A_{1}B_{1}$, $P_{2}\equiv{}A_{2}B_{2}$. По определению $(\bpar)$ $A_{1} \bpar A_{2}$ и $B_{1} \bpar B_{2}$. Тогда:
+		\begin{enumerate}
+			\item $x \in FV(A_{1})$. По индукционному предположению $A_{1}[x\coloneqq{}Q_{1}] \bpar A_{2}[x\coloneqq{}Q_{2}]$. Тогда $A_{1}[x\coloneqq{}Q_{1}]B_{1} \bpar A_{2}[x\coloneqq{}Q_{2}]B_{2}$. Тогда $A_{1}B_{1}[x\coloneqq{}Q_{1}] \bpar A_{2}B_{2}[x\coloneqq{}Q_{2}]$.
+			\item $x \in FV(B_{1})$. По индукционному предположению $B_{1}[x\coloneqq{}Q_{1}] \bpar B_{2}[x\coloneqq{}Q_{2}]$. Тогда $A_{1}B_{1}[x\coloneqq{}Q_{1}] \bpar A_{2}B_{2}[x\coloneqq{}Q_{2}]$.
+		\end{enumerate}
+		\item Пусть $P_{1}\equiv{}\lambda{}y.A_{1}$, $P_{2}\equiv{}\lambda{}y.A_{2}$. По определению $(\bpar)$ $A_{1}\bpar A_{2}$. Тогда по индукционному предположению $A_{1}[x\coloneqq{}Q_{1}] \bpar A_{2}[x\coloneqq{}Q_{2}]$. Тогда 
+		$\lambda{}y.(A_{1}[x\coloneqq{}Q_{1}]) \bpar \lambda{}y.(A_{2}[x\coloneqq{}Q_{2}])$ по определению $(\bpar)$. Следовательно 	$\lambda{}y.A_{1}[x\coloneqq{}Q_{1}] \bpar \lambda{}y.A_{2}[x\coloneqq{}Q_{2}]$ по определению подстановки.
+		\item Пусть $P_{1}=_\alpha(\lambda{}y.A_1)B_1$, $P_{2}=_\alpha A_2[y\coloneqq{}B_2]$ и $ A_1 \bpar A_2 $, $ B_1 \bpar B_2 $. По индукционному предположению получаем, что $A_1[x \coloneqq Q_1] \bpar A_2[x \coloneqq Q_2]$, $B_1[x \coloneqq Q_1] \bpar B_2[x \coloneqq Q_2]$. 
+               По определению $(\bpar)$ тогда $ (\lambda{}y.A_1[x\coloneqq Q_1])B_1[x \coloneqq Q_1] \bpar  A_2[y \coloneqq B_2][x \coloneqq Q_2]$
+	\end{itemize}
+%\end{proof}
+\end{frame}
+
+\begin{frame}{Лемма: $(\bpar)$ обладает ромбовидным свойством}
+
+	Будем доказывать индукцией по определению $(\bpar)$. Покажем, что если $M \bpar M_1$ и $M \bpar M_2$, то существует ${}M_3$, что $M_1 \bpar M_3$ и $M_2 \bpar M_3$. Рассмотрим случаи:
+	\begin{itemize}
+		\item Если $M\equiv M_1$, то просто возьмем $M_3\equiv M_2$.
+		\item Если $M\equiv \lambda{}x.P, M_1 \equiv \lambda{}x.P_1, M_2 \equiv \lambda{}x.P_2$ и $P \bpar P_1, P \bpar P_2$, то по предположению индукции 
+		существует $P_3$, что $P_1 \bpar P_3, P_2 \bpar P_3$, тогда возьмем $M_3\equiv \lambda{}x.P_3$.
+		\item Если $M \equiv P Q, M_1 \equiv P_1 Q_1$ --- естественное доказательство.
+%и по определению $(\bpar)$ $P \bpar P_1, Q \bpar Q_1$, то рассмотрим два случая:
+%		\begin{enumerate}
+%			\item $M_2 \equiv P_2 Q_2$. Тогда по предположению индукции существует $P_3$, что $P_1 \bpar P_3, P_2 \bpar P_3$. Аналогично для $Q$. Тогда возьмем $M_3 \equiv P_3 Q_3$.
+%			\item $P\equiv \lambda {}x.P'$ значит $P_1 \equiv \lambda{}x.P_1'$ и $ P' \bpar P_1'$. Пусть тогда $ M_2 \equiv P_2[x\coloneqq{} Q_2]$, по определению $(\bpar)$ $P' \bpar P_2, Q \bpar Q_2$. Тогда по предположению индукции и лемме $\ref{bparhelp}$ существует $M_3 \equiv P_3[x \coloneqq Q_3]$ такой, что $ P_1' \bpar P_3 $, $ Q_1 \bpar Q_3 $ и $ P_2 \bpar P_3 $, $ Q_2 \bpar Q_3 $.
+%		\end{enumerate}
+	\item Если $ M \equiv (\lambda{}x.P)Q $, $ M_1 \equiv P_1[x\coloneqq Q_1] $ и $ P \bpar P_1 $, $ Q \bpar Q_1$, то рассмотрим случаи:
+	\begin{enumerate}
+		\item $ M_2 \equiv (\lambda{}x.P_2)Q_2 $, $P \bpar P_2$, $Q \bpar Q_2$. Тогда по предположению индукции и лемме существует такой $ M_3 \equiv P_3[x \coloneqq Q_3] $, что $ P_1 \bpar P_3 $, $ Q_1 \bpar Q_3 $ и $ P_2 \bpar P_3 $, $ Q_2 \bpar Q_3 $.
+		\item $ M_2 \equiv P_2[x \coloneqq Q_2]$, $ P \bpar P_2 $, $ Q \bpar Q_2 $. Тогда по предположению индукции и лемме существует такой $ M_3 \equiv P_3[x \coloneqq Q_3] $, что $ P_1 \bpar P_3 $, $ Q_1 \bpar Q_3 $ и $ P_2 \bpar P_3 $, $ Q_2 \bpar Q_3 $.
+	\end{enumerate}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{}
+\begin{lmm}
+	\
+	\begin{enumerate}
+		\item $(\bpar )^{*} \subseteq (\to_{\beta})^{*}$
+		\item $(\to_{\beta})^{*} \subseteq (\bpar )^{*}$
+	\end{enumerate}
+\end{lmm}
+
+\begin{cons}
+	$(\to_{\beta})^{*}=(\bpar )^{*}$
+\end{cons}
+
+Из приведенных выше лемм и следствия докажем теорему Черча-Россера.
+
+\begin{proof}
+	$(\to_{\beta})^{*} = (\twoheadrightarrow_{\beta})$. Тогда $(\twoheadrightarrow_{\beta})=(\bpar )^{*}$. Значит из того, что $(\bpar )$ обладает ромбовидным свойством и леммы $\ref{refl}$, следует, что $(\twoheadrightarrow_{\beta})$ обладает ромбовидным свойством.
+\end{proof}
+\end{frame}
+
+\begin{frame}{Нормальный и аппликативный порядок вычислений}
+
+\begin{exm}
+	Выражение $KI\Omega$ можно редуцировать двумя способами:
+	\begin{enumerate}
+		\item $\comb K \comb I \Omega =_{\alpha} ((\lambda{}a.\lambda{}b.a) \comb I) \Omega \to_{\beta} (\lambda{}b.\comb I)\Omega  \to_{\beta} \comb I$
+		\item  $\comb K \comb I \Omega =_{\alpha} ((\lambda{}a.\lambda{}b.a) \comb I)((\lambda{}x.x \ x) (\lambda{}x.x \ x)) \twoheadrightarrow_{\beta} ((\lambda{}a.\lambda{}b.a) \comb I)((\lambda{}x.x \ x) (\lambda{}x.x \ x)) \to_{\beta} \comb K \comb I \Omega $
+	\end{enumerate}
+\end{exm}
+
+%Как мы видим, в первом случае мы достигли нормальной формы, в то время как во втором мы получили бесконечную редукцию. Разница двух этих способов в порядке редукции. Первый называется нормальный порядок, а второй аппликативный. 
+
+\begin{dfn}[нормальный порядок редукции]
+	Редукция самого левого $\beta$-редекса.
+\end{dfn}
+
+\begin{dfn}[аппликативный порядок редукции]
+	Редукция самого левого $\beta$-редекса из самых вложенных.
+\end{dfn}
+
+\begin{thm}[Приводится без доказательства]
+	Если нормальная форма существует, она может быть достигнута нормальным порядком редукции.
+\end{thm}
+\end{frame}
+
+\begin{frame}{Нормальный порядок --- медленный}
+
+\begin{exm}
+	Рассмотрим $\lambda$-выражение $(\lambda{}x.x \ x \ x \ x) (\comb I \comb I)$. Попробуем редуцировать его нормальным порядком:
+	 \[(\lambda{}x.x \ x \ x \ x) (\comb I \comb I) \to_{\beta} (\comb I \comb I)(\comb I \comb I)(\comb I \comb I)(\comb I \comb I) \to_{\beta} \comb I(\comb I \comb I)(\comb I \comb I)(\comb I \comb I) \to_{\beta} (\comb I \comb I)(\comb I \comb I)(\comb I \comb I) \to_{\beta} \ldots \to_{\beta} \comb I\] 
+	Как мы увидим, в данной ситуации аппликативный порядок редукции оказывается значительно эффективней: 
+	\[ (\lambda{}x.x \ x \ x \ x) (\comb I \comb I) \to_{\beta} (\lambda{}x.x \ x \ x \ x) \comb I \to_{\beta} \comb I \comb I \comb I \comb I\to_{\beta} \comb I \comb I \comb I \to_{\beta} \comb I \comb I \to_{\beta} \comb I \]
+\end{exm}
+\end{frame}
+
+\begin{frame}[fragile]{Как программировать? Любое значение -- замыкание}
+
+\begin{center}\begin{tabular}{ll}
+\texttt{let x = sqrt 256} &     \texttt{let x = fun () -> sqrt 256}
+\end{tabular}\end{center}
+
+Плюс мемоизация: 
+
+\begin{center}\begin{tabular}{l}
+\texttt{let x = fun () -> sqrt 256;;}\\
+\texttt{let y = x;;}\\
+\texttt{y () + x ()      (* вычисляется два раза *)}
+\end{tabular}\end{center}
+
+Давайте запоминать результаты!
+\begin{verbatim}
+type int-value = Compute of unit -> int | Result of int;;
+let compute v = match !v with
+    Compute f -> let res = f () in v := Result res; res
+  | Result r -> r;;
+
+let x = ref (Compute (fun () -> sqrt 256));;
+let y = x;;
+compute y + compute x
+\end{verbatim}
+\end{frame}
+
+\begin{frame}{Ленивые и энергичные вычисления}
+Энергичные вычисления: аппликативный порядок.
+Ленивые вычисления: нормальный порядок + мемоизация.
+
+If всегда ленив
+
+\begin{center}
+\texttt{let fact n = if n > 1 then n * fact (n-1) else 1}
+\end{center}
+
+Ленивое общение с внешним миром бессмысленно.
+\end{frame}
+
+\begin{frame}{Импликационный фрагмент ИИВ}
+
+Рассмотрим подмножество ИИВ, со следующей грамматикой:
+$\Phi ::= x \; | \; (\Phi \rightarrow \Phi)$
+
+Добавим в него схему аксиом
+
+$$\infer{\Gamma, \varphi \vdash \varphi}{}$$
+
+	Правило введения импликации:
+	\[
+	\infer{\Gamma \vdash \varphi \to \psi}{\Gamma, \varphi \vdash \psi}
+	\]
+
+	Правило удаления импликации:
+	\[
+	\infer{\Gamma \vdash \psi}{\Gamma \vdash \varphi \to \psi && \Gamma \vdash \varphi}
+	\]
+
+\begin{thm}	
+	Если $\Gamma$ и $\varphi$ состоят только из импликаций, то $\Gamma \vdash \varphi$ равносильна $\Gamma \vdash_\rightarrow \varphi$.
+\end{thm}
+\end{frame}
+
+\begin{comment}
+\begin{frame}{Пример}
+\begin{exm}
+	Докажем $\vdash \varphi \rightarrow \psi \rightarrow \varphi$
+	
+	\[
+	\infer[(\text{Введение импликации})]
+	{ \vdash \varphi \to (\psi \to \varphi) }
+	{ \infer[(\text{Введение импликации})]
+		{ \varphi \vdash \psi \to \varphi }
+		{\varphi, \psi \vdash \varphi}
+	}
+	\]
+\end{exm}
+
+\begin{exm}
+	Докажем $\alpha \rightarrow \beta \rightarrow \gamma, \; \alpha, \; \beta \vdash \gamma$
+	
+	\[
+	\infer
+	{ \alpha \rightarrow \beta \rightarrow \gamma, \; \alpha, \; \beta \vdash \gamma}{\infer
+		{\alpha \rightarrow \beta \rightarrow \gamma, \; \alpha, \; \beta \vdash \beta \rightarrow \gamma }{\alpha \rightarrow \beta \rightarrow \gamma, \; \alpha, \; \beta \vdash \alpha \rightarrow \beta \rightarrow \gamma && \alpha \rightarrow \beta \rightarrow \gamma, \; \alpha, \; \beta \vdash \alpha} && \alpha \rightarrow \beta \rightarrow \gamma, \alpha, \; \beta \vdash \beta}
+	\]
+	
+\end{exm}
+
+%\begin{note}
+%	В дальнейшем символом $\vdash_\rightarrow$ будем обозначать доказуемость в импликационном фрагменте.
+%\end{note}
+\end{frame}
+\end{comment}
+
+\begin{frame}{Замкнутость И.Ф.ИИВ}
+
+\begin{lemma}
+	\label{conj}
+	Если $\Gamma \vdash \varphi$, то в любой модели Крипке из $\Vdash \Gamma$ следует $\Vdash \varphi$
+\end{lemma}
+\begin{proof}
+	Пусть $\Gamma \vdash \varphi$. 
+	Тогда $\vdash \& \Gamma \rightarrow \varphi$, где $\& \Gamma$ --- конъюнкция всех утверждений в $\Gamma$.
+	По корректности моделей Крипке, будет выполнено $\Vdash \& \Gamma \rightarrow \varphi$. Переписывая $\&$ и $\rightarrow$ по определению, получаем $\Vdash \Gamma \ \Rightarrow \ \Vdash \varphi$.
+\end{proof}
+\end{frame}
+
+\begin{frame}{Замкнутость И.Ф.ИИВ}
+\begin{thm}
+	\label{kripke}
+	$\Gamma \vdash_\rightarrow \varphi$ т.и.т.т. в любой модели Крипке из $\Vdash \Gamma$ следует $\Vdash \varphi$
+\end{thm}
+\begin{proof}\
+	\begin{itemize}
+		\item $(\Rightarrow)$ Очевидно по лемме \ref{conj}.
+		\item $(\Leftarrow)$ Пусть в любой модели Крипке из $\Vdash \Gamma$ следует $\Vdash \varphi$. Докажем $\Gamma \vdash_\rightarrow \varphi$.
+		
+		Выберем подходящую модель Крипке. Напомним, что моделью Крипке называется тройка $\langle C, \succcurlyeq, \Vdash\rangle$, где $C$ -- множество миров, $\succcurlyeq$ -- отношение частичного порядка на $C$, $\Vdash$ -- отношение вынужденности переменной.
+		
+		\textbf{Построим модель Крипке} $\mathcal C = \langle C, \succcurlyeq, \Vdash \rangle$. 
+		
+		Пусть $C = \{\Delta \ |\ \Gamma \subseteq \Delta, \Delta \text{ замкнут относительно }\vdash_\rightarrow\}$. $\Delta$ замкнут относительно доказуемости, когда для любого $\varphi$ если $\Delta \vdash_\rightarrow \varphi$, то $\varphi \in \Delta$.
+		
+		$C_1 \succcurlyeq C_2$, если $C_1 \supseteq C_2$.
+		
+		$\Delta \Vdash \alpha$, если $\alpha \in \Delta$, $\alpha$ -- переменная.
+	\end{itemize}
+\end{proof}
+\end{frame}
+
+\begin{frame}{Лемма: В модели $\mathcal C$ $\Delta \Vdash \varphi$ т.и.т.т. $\varphi \in \Delta$}
+\begin{proof}
+			\textbf{База.} $\varphi \equiv \alpha$. $\Delta \Vdash \alpha \Leftrightarrow \alpha \in \Delta$ следует из определения вынужденности.
+			
+			\textbf{Индукционный переход.} $\varphi \equiv \psi \rightarrow \sigma$
+			
+			Индукционное предположение:
+			$\forall \Delta \in C: \Delta \Vdash \psi \Leftrightarrow \psi \in \Delta$, $\Delta \Vdash \sigma \Leftrightarrow \sigma \in \Delta$.
+			
+			Докажем, что $\Delta \Vdash \psi \rightarrow \sigma \Leftrightarrow \psi \rightarrow \sigma \in \Delta$ (два включения).
+\end{proof}
+\end{frame}
+
+\begin{frame}{Доказательство $\Delta \Vdash \psi \rightarrow \sigma \Leftrightarrow \psi \rightarrow \sigma \in \Delta$}
+				$(\Rightarrow)$ Пусть $\Delta \Vdash \psi \rightarrow \sigma$.
+				
+				Рассмотрим мир $\Pi = (\Delta \cup \{\psi\})^*$. $\Pi \Vdash \psi \rightarrow \sigma$, т.к. $\Delta \preccurlyeq \Pi$.
+				
+				$\psi \in \Pi$. Тогда, по инд. пред., $\Pi \Vdash \psi$. Значит, $\Pi \Vdash \sigma$. В самом деле, из определения вынужденности импликации в $\Pi$ следует, что если $\Pi \Vdash \psi$, то $\Pi \Vdash \sigma$.
+				
+				По инд. пред. заключаем $\sigma \in \Pi$, т.е. $\Pi \vdash_\rightarrow \sigma$, т.к. $\Pi$ -- замкнут по доказуемости. Ясно, что $\Delta, \psi \vdash_\rightarrow \sigma$. Действительно, в гипотезах доказательства $\Pi \vdash_\rightarrow \sigma$ использовалось не все бесконечное множество $\Pi$, а лишь конечный набор утверждений из него. Каждое такое утверждение выводится из $\Delta, \psi$, потому что $\Pi$ - замыкание $\Delta \cup \{\psi\}$. 
+				
+				Из $\Delta, \psi \vdash_\rightarrow \sigma$ следует $\Delta \vdash_\rightarrow \psi \rightarrow \sigma$. Таким образом, $\psi \rightarrow \sigma \in \Delta$.
+%\end{frame}
+
+%\begin{frame}{}
+				$(\Leftarrow)$ Пусть $\psi \rightarrow \sigma \in \Delta$.
+				
+				Рассмотрим произвольный мир $\Pi: \Delta \preccurlyeq \Pi \land \Pi \Vdash \psi$. По инд. пред. $\psi \in \Pi$. $\psi \rightarrow \sigma \in \Pi$, т.к. $\Delta \subseteq \Pi$. $\Pi \vdash_\rightarrow \psi$, $\Pi \vdash_\rightarrow \psi \rightarrow \sigma$. Очевидно, $\Pi \vdash_\rightarrow \sigma$. $\sigma \in \Pi$. Тогда, по инд. пред., $\Pi \Vdash \sigma$. Таким образом, $\Pi \Vdash \psi \rightarrow \sigma$, а следовательно, $\Delta \Vdash \psi \rightarrow \sigma$.
+\end{frame}
+
+\begin{frame}{Завершение доказательства}
+Теперь можем доказать теорему о замкнутости ИФИИВ.
+\begin{proof}
+	Следствие $\Gamma \vdash_\rightarrow \varphi \ \Rightarrow \ \Gamma \vdash \varphi$ очевидно.\\
+	Пусть $\Gamma \vdash \varphi$. По \ref{conj} получаем, что в любой модели Крипке из $\Vdash \Gamma$ следует $\Vdash \varphi$. Отсюда, по теореме \ref{kripke}, доказывается $\Gamma \vdash_\rightarrow \varphi$.
+\end{proof}
+\end{frame}
+
+\begin{frame}{Просто-типизированное лямбда-исчисление}
+\begin{dfn}[$\lambda_\rightarrow$ по Карри]\vspace{-0.5cm}
+%Просто-типизированное лямбда-исчисление (по Карри). %\pause Типы: $\tau ::= \alpha | (\tau\rightarrow\tau)$. \pause Язык: $\Gamma\vdash A:\varphi$
+$$\infer[x \notin \Gamma]{\Gamma,x:\varphi \vdash x:\varphi}{} \quad\quad 
+  \infer[x \notin \Gamma]{\Gamma\vdash \lambda x.A: \varphi\rightarrow\psi}{\Gamma,x:\varphi\vdash A:\psi} \quad\quad 
+  \infer{\Gamma\vdash B A:\psi}{\Gamma\vdash A:\varphi\quad\quad\Gamma\vdash B:\varphi\rightarrow\psi}$$
+\end{dfn}
+
+\begin{dfn}[$\lambda_\rightarrow$ по Чёрчу]\vspace{-0.5cm}
+$$\infer[x \notin \Gamma]{\Gamma,x:\varphi \vdash x:\varphi}{} \quad\quad 
+  \infer[x \notin \Gamma]{\Gamma\vdash \lambda x^{\color{blue}\varphi}.A: \varphi\rightarrow\psi}{\Gamma,x:\varphi\vdash A:\psi} \quad\quad 
+  \infer{\Gamma\vdash B A:\psi}{\Gamma\vdash A:\varphi\quad\quad\Gamma\vdash B:\varphi\rightarrow\psi}$$
+\end{dfn}\pause
+
+\begin{exm}
+\begin{tabular}{l|l}
+По Карри & По Чёрчу\\\hline
+$\lambda f.\lambda x.f\ (f\ x) : (\alpha\rightarrow\alpha)\rightarrow(\alpha\rightarrow\alpha)$ & $\lambda f^{\alpha\rightarrow\alpha}.\lambda x^\alpha.f\ (f\ x) : (\alpha\rightarrow\alpha)\rightarrow(\alpha\rightarrow\alpha)$\\\pause
+$\lambda f.\lambda x.f\ (f\ x) : (\beta\rightarrow\beta)\rightarrow(\beta\rightarrow\beta)$ & $\lambda f^{\beta\rightarrow\beta}.\lambda x^\beta.f\ (f\ x) : (\beta\rightarrow\beta)\rightarrow(\beta\rightarrow\beta)$
+\end{tabular}
+\end{exm}
+
+%Изоморофизм Карри-Ховарда:\\
+%Типизированы по Чёрчу: Си, Паскаль, Джава, ...\\
+%Типизированы по Карри: Окамль, Хаскель, ...
+\end{frame}
+
+\begin{frame}{Теоремы о $\lambda_\rightarrow$}
+
+\begin{lmm}[о редукции, subject reduction]
+Если $A \twoheadrightarrow_\beta B$ и $\vdash A: \tau$, то $\vdash B: \tau$.
+\end{lmm}
+
+\begin{lmm}
+Если $\vdash A : \tau$, то любое подвыражение $A$ также имеет тип.
+\end{lmm}
+
+\begin{thm}[Чёрча-Россера]
+Если $\vdash A:\tau$, $A \twoheadrightarrow_\beta B$, $A \twoheadrightarrow_\beta C$ и $B \ne C$, то найдётся $D$, что 
+$\vdash D :\tau$, и $B \twoheadrightarrow_\beta D$, $C \twoheadrightarrow_\beta D$.
+\end{thm}
+\end{frame}
+
+\begin{frame}{Соответствие между исчислениями}
+\begin{dfn}
+$$|A|=\left\{\begin{array}{ll}x, & A = x\\
+\lambda x.|Q| & A = \lambda x^\tau.Q\\
+|P|\ |Q| & A = P\ Q
+\end{array}\right.$$
+\end{dfn}\vspace{-0.5cm}
+
+\begin{thm}\begin{enumerate}
+\item Если $\Gamma \vdash_\text{ч} A : \tau$, то $|Gamma| \vdash_\text{к} |A| : \tau$;
+\item Если $\Gamma \vdash_\text{к} A : \tau$, то найдётся такой $B: A = |B|$, что $\Gamma \vdash_\text{ч} B : \tau$.
+\end{enumerate}
+\end{thm}
+
+\begin{thm}[уникальность типов, для исчисления по Чёрчу]
+\begin{enumerate}
+\item $\Gamma \vdash_\text{ч} M : \sigma$ и $\Gamma \vdash_\text{ч} M: \tau$ влечёт $\sigma = \tau$;
+\item $\Gamma \vdash_\text{ч} M : \sigma$, $\Gamma \vdash_\text{ч} N : \tau$ и $M =_\beta N$ влечёт $\sigma = \tau$.
+\end{enumerate}
+\end{thm}
+
+\begin{lmm}[о расширении, subject expansion]
+Если $\Gamma \vdash_\text{ч} A : \tau$ и $B \twoheadrightarrow_\beta A$, то $\Gamma \vdash_\text{ч} B : \tau$.
+%Обратное для исчисления по Карри неверно: $\not\vdash K\ I\ \Omega : \tau$, но $K\ I\ \Omega \twoheadrightarrow_\beta I$ и $I : \alpha\rightarrow\alpha$.
+\end{lmm}
+\end{frame}
+
+\begin{frame}{Изоморфизм Карри-Ховарда}
+\begin{thm}[изоморфизм Карри-Ховарда]
+\begin{enumerate}
+\item Если $\Gamma\vdash\tau$, то найдётся $\Delta$, $A$, что $\Gamma = |\Delta|$ и $\Delta \vdash A : \tau$;
+\item Если $\Gamma \vdash A : \tau$, то $|\Gamma| \vdash \tau$.
+\end{enumerate}
+\end{thm}
+
+\end{frame}
+
+\end{document}
