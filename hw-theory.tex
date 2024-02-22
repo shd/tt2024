@@ -1,0 +1,168 @@
+\documentclass[10pt,a4paper,oneside]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{stmaryrd}
+\usepackage{comment}
+\usepackage{cmll}
+\usepackage{mathrsfs}
+\usepackage{hyperref}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
+\usepackage{proof}
+\usepackage{tikz}
+\usepackage{multicol}
+
+\makeatletter
+\newcommand{\dotminus}{\mathbin{\text{\@dotminus}}}
+
+\newcommand{\@dotminus}{%
+  \ooalign{\hidewidth\raise1ex\hbox{.}\hidewidth\cr$\m@th-$\cr}%
+}
+\makeatother
+
+\usetikzlibrary{arrows,backgrounds,patterns,matrix,shapes,fit,calc,shadows,plotmarks}
+
+\newtheorem{definition}{Определение}
+\begin{document}
+
+\begin{center}{\Large\textsc{\textbf{Теоретические домашние задания}}}\\
+             \it Теория типов, ИТМО, совместно М3232-М3239 и M3332-M3339, весна 2024 года\end{center}
+
+\section*{Домашнее задание №1: лямбда исчисление --- бестиповое и просто-типизированное}
+
+\begin{enumerate}
+\item Бесконечное количество комбинаторов неподвижной точки. Дадим следующие определения
+$$\begin{array}{l}
+L := \lambda abcdefghijklmnopqstuvwxyzr.r(thisisafixedpointcombinator)\\
+R := LLLLLLLLLLLLLLLLLLLLLLLLLL\end{array}$$
+В данном определении терм $R$ является комбинатором неподвижной точки: каков бы ни был терм
+$F$, выполнено $R\ F =_\beta F\ (R\ F)$.
+\begin{enumerate}
+\item Докажите, что данный комбинатор --- действительно комбинатор неподвижной точки.
+\item Пусть в качестве имён переменных разрешены русские буквы. Постройте аналогичное выражение
+по-русски: с 33 параметрами и осмысленной русской фразой в терме $L$; покажите, что оно является
+комбинатором неподвижной точки.
+\end{enumerate}
+
+\item Найдите необитаемый тип в просто-типизированном лямбда-исчислении (напомним: тип $\tau$ 
+называется необитаемым, если ни для какого $P$ не выполнено $\vdash P : \tau$).
+
+\item Напомним определение: комбинатор --- лямбда-выражение без свободных переменных. Также напомним:
+$$\begin{array}{l}
+S := \lambda x.\lambda y.\lambda z.x\ z\ (y\ z)\\
+K := \lambda x.\lambda y.x\\
+I := \lambda x.x
+\end{array}$$
+
+Известна теорема о том, что для любого комбинатора $X$ можно найти выражение $P$
+(состоящее только из скобок, пробелов и комбинаторов $S$ и $K$), что $X =_\beta P$.
+Будем говорить, что комбинатор $P$ \emph{выражает} комбинатор $X$ в базисе $SK$.
+
+Косвенным аргументом (пояснением, но не доказательством!) в пользу этой теоремы являются 
+два следующих соображения:
+\begin{itemize}
+\item теорема о замкнутости ИфИИВ: если $\vdash \varphi$, то $\vdash_\rightarrow \varphi$,
+значит, если выражение имеет тип, то этот тип можно получить с помощью доказательства в
+стиле Гильберта;
+\item типы комбинаторов $S$ и $K$ --- это, соответственно, вторая и первая схемы аксиом.
+\end{itemize}
+
+Докажите тип следующих выражений как логическое высказывание с помощью
+гильбертового вывода и, пользуясь этим доказательством как источником вдохновения, 
+выразите комбинаторы в базисе $SK$:
+\begin{enumerate}
+\item $\lambda x.\lambda y.\lambda z.y$
+\item $\lambda x.\lambda y.\lambda z.y x z$
+\item $\overline{1}$
+\item $Not$
+\item $Xor$
+\item $InR$
+\end{enumerate}
+
+\item Покажите на основании следующего преобразования полноту комбинаторного базиса SKI
+(проведите полное рассуждение по индукции, из которого будет следовать отсутствие 
+в результате других термов, кроме SKI, бета-эквивалентность
+и определённость результата для всех комбинаторов $\sigma$):
+
+$$[\sigma]=\left\{\begin{array}{ll}
+x, & \sigma = x\\
+\left[\varphi\right]\ [\psi], & \sigma = \varphi\ \psi\\
+K\ [\varphi], & \sigma = \lambda x.\varphi,\quad x \notin FV(\varphi)\\
+I, & \sigma = \lambda x.x \\
+\left[\lambda x.\left[\lambda y.\varphi\right]\right], & \sigma = \lambda x.\lambda y.\varphi,\quad x \in FV(\varphi), x \ne y\\
+S\ [\lambda x.\varphi]\ [\lambda x.\psi], & \sigma = \lambda x.\varphi\ \psi,\quad x \in FV(\varphi)\cup FV(\psi)
+\end{array}\right.$$
+
+Заметим, что данные равенства объясняют смысл названий комбинаторов:
+
+\begin{tabular}{ll}
+$S$ & verSchmelzung, <<сплавление>> \\
+$K$ & Konstanz \\
+$I$ & Identit\"at
+\end{tabular}
+
+\item Покажите, что следующая система комбинаторов образует полный базис в бестиповом
+лямбда-исчислении, но соответствующая им система аксиом в исчислении гильбертового типа
+не образует 
+ $\lambda_\rightarrow$
+
+\item Напомним определение аппликативного порядка редукции:
+редуцируется самый левый из самых вложенных редексов. Например, в случае выражения
+$(\lambda x.I\ I)\ (\lambda y.I\ I)$ самые вложенные редексы --- применения $I\ I$:
+
+$$(\lambda x.\underline{I\ I})\ (\lambda y.\underline{I\ I})$$
+
+и надо выбрать самый левый из них:
+
+$$(\lambda x.\underline{I\ I})\ (\lambda y.I\ I)$$
+\begin{enumerate}
+\item Проведите аппликативную редукцию выражения $2\ 2$.
+\item Докажите или опровергните, что параллельная бета-редукция из теоремы Чёрча-Россера не медленнее 
+(в смысле количества операций для приведения выражения к нормальной форме), чем нормальный порядок 
+редукции с мемоизацией.
+\item Найдите лямбда-выражение, которое редуцируется медленнее при нормальном порядке редукции,
+чем при аппликативном, даже при наличии мемоизации.
+\end{enumerate}
+
+\item Напомним определение бета-редукции. $A \rightarrow_\beta B$, если:
+\begin{itemize}
+\item $A \equiv (\lambda x.P)\ Q$, $B \equiv P\ [x := Q]$, при условии свободы для подстановки;
+\item $A \equiv (P\ Q)$, $B \equiv (P'\ Q')$, при этом $P \rightarrow_\beta P'$ и $Q = Q'$, либо $P = P'$ и $Q \rightarrow_\beta Q'$;
+\item $A \equiv (\lambda x.P)$, $B \equiv (\lambda x.P')$, и $P \rightarrow_\beta P'$.
+\end{itemize}
+
+\begin{enumerate}
+\item Найдите лямбда-выражение, бета-редукция которого не может быть произведена из-за нарушения
+правила свободы для подстановки (для продолжения редукции потребуется производить переименование
+связанных переменных). Поясните, какое ожидаемое ценное свойство будет нарушено, если ограничение
+правила проигнорировать.
+\item Покажите, что недостаточно наложить требования на исходное выражение, и свобода для подстановки
+может быть нарушена уже в процессе редукции исходно полностью корректного лямбда-выражения.
+\end{enumerate}
+
+\item Будем говорить, что выражение $A$ находится в \emph{слабой заголовочной нормальной форме} (WHNF),
+если оно не имеет вид $A \equiv (\lambda x.P)\ Q$ (то есть, самый верхний терм его не является редексом).
+Выражение находится в \emph{заголовочной нормальной форме} (HNF), когда его верхний терм --- не редекс и не лямбда-абстракция
+с бета-редексами в теле.
+\begin{enumerate}
+\item Приведите нормальным порядком редукции выражение $2\ 2$ в СЗНФ.
+\item Приведите нормальным порядком редукции выражение $Y\ (\lambda f.\lambda x.(IsZero\ x)\ 1\ (x \cdot f(x-1)))\ 3$ в СЗНФ.
+\item Верно ли, что <<нормальность>> формы выражения может в процессе редукции только усиливаться
+(никакая --- слабая заголовочная Н.Ф. --- заголовочная Н.Ф. --- нормальная форма)?
+\end{enumerate}
+
+\item Как мы уже разбирали, $\not\vdash x\ x:\tau$ в силу дополнительных ограничений
+правила
+$$\infer[x \notin FV(\Gamma)]{\Gamma, x:\tau\vdash x:\tau}{}$$
+
+Найдите лямбда-выражение $N$, что $\not\vdash N:\tau$ в силу ограничений правила
+$$\infer[x \notin FV(\Gamma)]{\Gamma \vdash \lambda x.N:\sigma\to\tau}{\Gamma, x:\sigma \vdash N:\tau}$$
+
+%\item Верно ли, что $S = B(BW)(BBC)$? Если нет, то как правильно?
+
+\end{enumerate}
+
+\end{document}
