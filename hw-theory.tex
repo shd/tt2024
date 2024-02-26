@@ -172,4 +172,64 @@ $$\infer[x \notin FV(\Gamma)]{\Gamma \vdash \lambda x.N:\sigma\to\tau}{\Gamma, x
 
 \end{enumerate}
 
+\section*{Домашнее задание №2: задачи типизации лямбда исчисления}
+
+\begin{enumerate}
+\item Рассмотрим подробнее отличия исчисления по Чёрчу и по Карри. 
+Определим точно бета-редукцию в исчислении по Чёрчу: $A \rightarrow_\beta B$, если
+
+\begin{tabular}{ll}
+$A = (\lambda x^\sigma.P)\ Q$, & $B = P [x := Q]$\\
+$A = P\ Q$, & $B = P\ Q'$ или $B = P'\ Q$ при $P \rightarrow_\beta P'$ и $Q \rightarrow_\beta Q'$\\
+$A = \lambda x^\sigma.P$, & $B = \lambda x^\sigma.P'$ при $P \rightarrow_\beta P'$
+\end{tabular}
+\begin{enumerate}
+\item Покажите, что в исчислении по Карри не выполняется даже <<ограниченное>> свойство распространения типизации
+(subject expansion): 
+если $\vdash_\text{к} M:\sigma$, $M \twoheadrightarrow_\beta N$ и $\vdash_\text{к} N:\tau$,
+то необязательно, что $\sigma=\tau$.
+\item Покажите, что в исчислении по Чёрчу <<полное>> свойство распространения типизации также не выполняется:
+
+\begin{center}найдутся такие $M,N,\sigma$, что $\vdash_\text{ч} N:\sigma$, $M\twoheadrightarrow_\beta N$, но $\not\vdash_\text{ч} M:\sigma$.\end{center}
+
+Но при этом в исчислении по Чёрчу выполнено <<ограниченное>> свойство распространения типизации:
+
+\begin{center}если $\vdash_\text{к} M:\sigma$, $M \twoheadrightarrow_\beta N$ и $\vdash_\text{к} N:\tau$,
+то тогда $\sigma=\tau$.\end{center}
+\end{enumerate}
+
+\item Покажите, что никакие связки в ИИВ не выражаются друг через друга: то есть, нет такой формулы $\varphi(A,B)$ из языка 
+интуиционистской логики, не использующей связку $\star$, что $\vdash A \star B \rightarrow \varphi(A,B)$ и $\vdash\varphi(A,B) \rightarrow A \star B$.
+Покажите это для каждой связки в отдельности:
+\begin{enumerate}
+\item конъюнкция;
+\item дизъюнкция;
+\item импликация;
+\item отрицание.
+\end{enumerate}
+
+\item Рассмотрим алгоритм построения системы уравнений, а именно случай, когда рассматривается два разных вхождения
+одинакового по тексту применения. Например, $(x\ x)\ (x\ x)$ имеет два разных вхождения одной и той же аппликации
+$x\ x$. Всегда ли для корректной работы алгоритма достаточно одной типовой переменной $\beta_{xx}$ для этих двух вхождений, 
+или нужны две разные $\beta^L_{xx}$ и $\beta^R_{xx}$? 
+Примечание: при одной переменной для обоих аппликаций система в данном случае, очевидно, несовместна: 
+$\beta_{xx} \ne \beta_{xx} \rightarrow \sigma$.
+Но контрпримером это не является, поскольку типа у данного выражения всё равно нет.
+
+\item Предложим альтернативные аксиомы для конъюнкции:
+
+$$\infer[\text{Введ. }\with]{\Gamma\vdash \alpha\with \beta}{\Gamma\vdash \alpha\ \ \ \Gamma\vdash \beta}\quad\quad
+  \infer[\text{Удал. }\with]{\Gamma\vdash \gamma}{\Gamma\vdash \alpha\with \beta\ \ \ \Gamma, \alpha, \beta\vdash \gamma}$$
+
+\begin{enumerate}
+\item Предложите лямбда-выражения, соответствующие данным аксиомам; поясните, как данные выражения 
+абстрагируют понятие <<упорядоченной пары>>.
+\item Выразите изложенные в лекции аксиомы конъюнкции через приведённые в условии.
+\item Выразите приведённые в условии аксиомы конъюнкции через изложенные в лекции.
+\end{enumerate}
+
+\item Постройте систему уравнений для $Y$-комбинатора и примените к ней алгоритм унификации (ожидается,
+что система окажется несовместной).
+\end{enumerate}
+
 \end{document}
