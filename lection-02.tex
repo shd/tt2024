@@ -1,0 +1,332 @@
+\documentclass[aspectratio=169]{beamer}
+\setbeamertemplate{navigation symbols}{}
+\usepackage{graphicx}
+\usepackage{stmaryrd}
+\usepackage[T1,T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{verbatim}
+\usepackage{amsthm}
+\usepackage{bnf}
+\usepackage{tikz}
+\usepackage{enumerate}
+\usepackage{mathtext}
+\usepackage{mathtools}
+\usepackage{mathabx}
+%\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
+\usepackage{proof}
+%\usepackage{paracol}
+%\usepackage{enumitem}
+\usepackage{color}
+\usepackage{colortbl}
+\usepackage{minted}
+%\usepackage{hyperref}
+\usetikzlibrary{graphs}
+\usetikzlibrary{graphs.standard}
+\usetikzlibrary{automata,positioning}
+\usepackage{float}
+
+\begin{document}
+
+%\theoremstyle{dfn}
+\newtheorem{dfn}{Определение}[section]
+\newtheorem{nte}{Замечание}[section]
+
+\newtheorem{axiom}{Аксиома}[section]
+\newtheorem{thm}{Теорема}[section]
+\newtheorem{lmm}[theorem]{Лемма}
+\newtheorem{statement}{Утверждение}[section]
+\newtheorem{oun_paragraph}{Пункт}[section]
+\newtheorem{cons}{Следствие}[section]
+\newtheorem*{exm}{Пример}
+
+\newcommand{\comb}[1]{\operatorname{\bf{\textrm{#1}}}}
+\newcommand{\func}[1]{\operatorname{#1}}
+\newcommand{\reduction}[1]{{\color{OrangeRed}#1}}
+\newcommand{\set}[1]{\left\{#1\right\}}
+
+\def\from#1{\par \parbox{0.7\textwidth}{\par \hfill\raggedleft \it #1}} 
+
+\begin{frame}{}
+\begin{center}\Large Лекция 2.\\ \Large Задачи типизации $\lambda_\rightarrow$. \\Выразительная сила $\lambda_\rightarrow$.\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Основные задачи типизации $\lambda$-исчисления}
+
+Рассмотрим $? \vdash ? : ?$.
+
+		\begin{enumerate}
+			\item \emph{Проверка типа:} выполняется ли $\Gamma\vdash M:\sigma$ для контекста $\Gamma\text{, терма }M\text{ и типа }\sigma$\\
+
+{\color{gray}Компиляция в языке программирования, типизированном по Чёрчу. Проверка доказательства.}
+			\item \emph{Реконструкция типа:} $?\vdash M:\:?$.
+
+{\color{gray}Компиляция в языке программирования, типизированном по Карри. Это бывает чаще, чем кажется.}
+
+\verb!template <class A, class B>!\\
+\verb!auto min(A a, B b) -> decltype(a < b ? a : b) {!\\
+\verb!    return (a < b) ? a : b;!\\
+\verb!}!
+
+			\item \emph{Обитаемость типа:} $\Gamma\vdash ?:\sigma$.
+
+{\color{gray}Поиск доказательства.}
+		\end{enumerate}
+Все задачи разрешимы.
+\end{frame}
+
+\begin{frame}{Задача реконструкции типа}
+\begin{dfn}Алгебраический терм $$\theta ::= x\:|\:(f\:\theta\:\ldots\:\theta)$$\end{dfn}\vspace{-0.3cm}
+\begin{dfn}Подстановка переменных --- функция $S_0: V \rightarrow T$, где $S_0(x) = x$ почти везде
+(за исключением конечного множества переменных).
+
+Подстановка: $S: T \rightarrow T$, что $S(x) = S_0(x)$, но $S(f\ \theta_1\ \dots \theta_k) = f\ S(\theta_1)\ \dots\ S(\theta_k)$
+$S(\Gamma) = \{ x : S(\tau_x)\ |\ x : \tau_x \in \Gamma\}$
+\end{dfn}
+
+\begin{dfn}Будем воспринимать запись типа как некоторое выражение в алгебраических термах, импликация --- единственный
+функциональный символ.
+Наиболее общей парой для задачи реконструкции типа $?\vdash M:?$ назовём такие $\langle \Gamma, \gamma \rangle$, что:
+\begin{enumerate}
+\item $\Gamma\vdash M:\gamma$
+\item Если $\Delta\vdash M:\delta$, то найдётся такая подстановка $S$, что $\Delta = S(\Gamma)$ и $\delta = S(\gamma)$.
+\end{enumerate}
+\end{dfn}
+
+\end{frame}
+
+\begin{frame}{Общий план решения}
+\begin{enumerate}
+\item Основа решения --- алгоритм унификации для системы уравнений в алгебраических термах.
+\item По терму $M$ строим систему уравнений в алгебраических термах.
+\item Наиболее общим унификатором системы будет является подстановка, из которой можно получить наиболее общую пару.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Система уравнений в алгебраических термах}
+	\begin{dfn}Система уравнений в алгебраических термах\end{dfn}
+	$$
+		\begin{cases}
+			\theta_1=\sigma_1&\\
+			\vdots&\\
+			\theta_n=\sigma_n&\\
+		\end{cases}
+	$$\par где $\theta_i \text{ и } \sigma_i-\text{термы}$\par
+\end{frame}
+
+\begin{frame}{Задача унификации}
+
+\begin{dfn}Решением задачи унификации для системы уравнений $\sigma_k = \tau_k$ назовём такую подстановку
+$S$, что $S(\sigma_k) = S(\tau_k)$.
+\end{dfn}
+\begin{dfn}Наиболее общим решением задачи унификации назовём такую подстановку $S$, что для любого
+другого решения $T$ найдётся подстановка $R$, что $T(\rho) = R(S(\rho))$.
+\end{dfn}
+\begin{dfn}Система в разрешённой форме --- каждое уравнение имеет вид $x_i = \theta_i$, причём
+каждый из $x_i$ входит в систему ровно один раз (является левой частью одного из уравнений)
+\end{dfn}
+\begin{dfn}Система несовместна --- система не имеет решений.\end{dfn}
+\end{frame}
+
+\begin{frame}{Алгоритм унификации}
+Пусть дана система уравнений $\sigma_i = \tau_i$. 
+Возьмём произвольное уравнение и попробуем проверить/применить одно из следующих условий/действий к нему:
+
+		\begin{enumerate}[(a)]
+		\item $\sigma_i=x$ если $\sigma_i$ не переменная перепишем как $x=\sigma_i$
+		\item $\sigma_i = \sigma_i$ удалим
+		\item $f\:\theta_1\hdots\theta_n=f\:\rho_1\hdots\rho_n$ заменим на $n$ уравнений $\theta_k = \rho_k$
+		\item если уравнение имеет вид $x=\tau_i$ и $x$ входит хотя бы в одно другое уравнение, то заменим все другие уравнения на $\sigma_k[x := \tau_i] = \tau_k[x := \tau_i]$
+		\item если уравнение имеет вид $x = f\ \dots x_i \dots$, система несовместна (occurrs check)
+		\item если уравнение имеет вид $f\ ... = g\ ...$ при $f \ne g$, система несовместна.
+		\end{enumerate}
+
+Если нет ни одного подходящего правила ни для одного уравнения --- закончим работу (система находится в разрешённой форме).
+\end{frame}
+
+\begin{frame}{Алгоритм всегда завершает работу}
+\begin{itemize}
+\item Рассмотрим $\langle x,y,z \rangle$,
+где:
+\begin{itemize}\item $x$ --- количество переменных, входящих в систему, которые входят в левую часть
+некоторого уравнения и при этом имеют хотя бы ещё одно вхождение в систему.
+\item $y$ --- количество функциональных символов в системе,
+\item $z$ --- количество уравнений типа $a=a$ и $\theta=b$, где $\theta$ не переменная.
+\end{itemize}
+\item Упорядочим тройки лексикографически (согласно порядковому типу $\omega^3$).
+
+\item Заметим, что операции $(a)$ и $(b)$ всегда уменьшают $z$ и иногда уменьшают $x$.
+Операция $(c)$ всегда уменьшает $y$, иногда $x$ и, возможно, увеличивает $z$.
+Операция $(d)$ всегда уменьшает $x$ и иногда увеличивает $y$. То есть, операции $(a)-(d)$ всегда уменьшают
+соответствующий ординал.
+
+\item Cогласно лемме из матлога любая строго убывающая последовательность ординалов имеет конечную длину.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Корректность алгоритма}
+\begin{thm}Для системы уравнений $\sigma_k = \tau_k$ алгоритм даёт наиболее общее решение, если оно существует.\end{thm}
+\begin{proof}
+\begin{itemize}
+\item Операции $(a)-(d)$ не меняют множества решений системы. За конечное время либо выполнится условие $(e)$ или $(f)$,
+либо будут исчерпаны правила.
+\item Условия $(e)$, $(f)$ очевидно означают несовместность системы (в т.ч. исходной).
+\item При отсутствии возможности применения правил и условий все уравнения имеют вид $x = \theta_x$,
+где $x$ входит в систему только один раз. Построим $S_0(x) = \theta_x$. 
+
+\item Если есть подстановка $T: T(\sigma_k) = T(\tau_k)$, тогда положим $R = \mathcal{U}(\{ S_0(x) = T_0(x)\ |\ x \ne T_0(x)\})$.
+Очевидно, $T(\zeta) = R(S(\zeta))$
+\end{itemize}
+\end{proof}
+\end{frame}
+
+\begin{frame}{Построение системы по терму $M$}
+Будем строить систему рекурсией по структуре терма $M$ (предполагаем, что все имена
+для связанных переменных уникальны). 
+Каждой переменной $x$ сопоставим свежую типовую переменную $\alpha_x$. Также каждой аппликации $P\ Q$ в терме сопоставим
+свежую типовую переменную $\beta_{PQ}$. 
+
+
+%В итоге получим $\langle \mathcal{E}, \sigma\rangle$, где $\mathcal{E}$ ---
+%система уравнений, а $\sigma$ --- тип терма $M$. 
+По терму $M$ и по всем его подтермам рекурсивно построим пару $\langle \mathcal{E}_M, \sigma_M\rangle$ так:
+
+%Учитывайте недостаток записи: здесь две разные переменные $\beta_{xx}$: $(x\ x)\ (x\ x)$
+
+$$\langle\mathcal{E}_M,\sigma_M\rangle := \left\{\begin{array}{ll}\langle \varnothing, \alpha_x\rangle, & M = x\\
+\langle \mathcal{E}_P, \alpha_x\rightarrow\sigma_P\rangle, & M = \lambda x.P\\
+\langle \mathcal{E}_P\cup\mathcal{E}_Q\cup\{\sigma_P = \sigma_Q\rightarrow\beta_{PQ}\}, \beta_{PQ}\rangle, 
+   & M = P\ Q
+\end{array}\right.$$
+
+\begin{thm} Если $S = \mathcal{U}(\mathcal{E}_M)$, то наиболее общим решением задачи типизации будет
+$\langle\{ x : S(\alpha_x)\ |\ x \in FV(M) \}, S(\sigma_M)\rangle$\end{thm}
+\begin{proof} Индукция по структуре $M$. \end{proof}
+\end{frame}
+
+\begin{frame}{Пример вывода типов }
+\begin{enumerate}
+\item Выберем пример ($M = \lambda f.\lambda x.f\ (f\ x)$) и индуктивно составим систему:
+\begin{itemize}
+\item Для $f\ x$:\quad $\langle\{\alpha_f = \alpha_x\rightarrow\beta_{fx}\},\; \beta_{fx}\rangle$
+\item Для $f\ (f\ x)$:\quad $\langle\{\alpha_f = \alpha_x\rightarrow\beta_{fx}, \alpha_f = \beta_{fx}\rightarrow\beta_{ffx}\}, \beta_{ffx}\rangle$
+\item Для $\lambda x.f\ (f\ x)$:\quad $\langle\{\alpha_f = \alpha_x\rightarrow\beta_{fx}, \alpha_f = \beta_{fx}\rightarrow\beta_{ffx}\}, \alpha_x\rightarrow\beta_{ffx}\rangle$
+\item Для $\lambda f.\lambda x.f\ (f\ x)$:\quad $\langle\{\alpha_f = \alpha_x\rightarrow\beta_{fx}, \alpha_f = \beta_{fx}\rightarrow\beta_{ffx}\}, \alpha_f\rightarrow\alpha_x\rightarrow\beta_{ffx}\rangle$
+\end{itemize}
+\item Приводим систему к разрешённой форме:
+\begin{itemize}
+\item $\alpha_f = \alpha_x\rightarrow\beta_{fx}, \alpha_f = \beta_{fx}\rightarrow\beta_{ffx}$
+\item $\alpha_f = \alpha_x\rightarrow\beta_{fx}, \alpha_x\rightarrow\beta_{fx} = \beta_{fx}\rightarrow\beta_{ffx}$, правило $(d)$
+\item $\alpha_f = \alpha_x\rightarrow\beta_{fx}, \alpha_x = \beta_{fx}, \beta_{fx} = \beta_{ffx}$, правило $(c)$
+\item $\alpha_f = \beta_{fx}\rightarrow\beta_{fx}, \alpha_x = \beta_{fx}, \beta_{fx} = \beta_{ffx}$, правило $(d)$
+\item $\alpha_f = \beta_{ffx}\rightarrow\beta_{ffx}, \alpha_x = \beta_{ffx}, \beta_{fx} = \beta_{ffx}$, правило $(d)$
+\end{itemize}
+\item Строим функцию подстановки:
+$S_0(\alpha_f) = \beta_{ffx}\rightarrow\beta_{ffx}, S_0(\alpha_x) = S_0(\beta_{fx}) = \beta_{ffx}$
+\item Наиболее общая пара:
+$\langle \varnothing, S(\alpha_f\rightarrow\alpha_x\rightarrow\beta_{ffx})\rangle$, то есть
+$$\vdash \lambda f.\lambda x.f\ (f\ x) : (\beta_{ffx}\rightarrow\beta_{ffx})\rightarrow\beta_{ffx}\rightarrow\beta_{ffx}$$
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Проверка типа}
+\begin{enumerate}
+\item Задача реконструкции типа находит наиболее общую типизацию.
+\item Сведём задачу проверки $\Gamma\vdash M:\sigma$ к задаче реконструкции типа $?\vdash M:?$ и найдём $\langle \Gamma', \sigma' \rangle$.
+\item Проверим, является ли $\langle \Gamma, \sigma\rangle$ частным случаем $\langle \Gamma', \sigma' \rangle$.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Обитаемость типа}
+\begin{enumerate}
+\item Задача поиска $M$, что $\Gamma\vdash M:\sigma$.
+\item Эквивалентно поиску доказательства утверждения $\sigma$ в ИИП (разрешимо).
+\item По доказательству затем получим его краткую запись в виде терма.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Выразительная сила}
+\begin{dfn}
+Расширенный полином, где $P(x)$, $P(x,y)$ --- полиномы (выражения, составленные из сложения, умножения, аргументов и натуральных констант),
+$c$ --- константа:
+$$E(m,n) := \left\{\begin{array}{ll}
+c,& m = 0, n = 0\\
+P_1(m), & n=0\\
+P_2(n), & m=0\\
+P_3(m,n), & m>0, n>0
+\end{array}\right.$$
+\end{dfn}
+
+\begin{thm}
+Пусть $\eta = (\alpha\rightarrow\alpha)\rightarrow(\alpha\rightarrow\alpha)$. 
+Если $F: \eta\rightarrow\eta\rightarrow\eta$, то найдётся такой расширенный
+полином $E(m,n)$, что при всех $m,n \in \mathbb{N}_0$ выполнено $F\ \overline{m}\ \overline{n} =_\beta \overline{E(m,n)}$, 
+либо $F\ \overline{m}\ \overline{n} =_\beta \lambda f.f$ при $E(m,n) = 1$.
+\end{thm}
+\end{frame}
+
+\begin{frame}{Расширение языка: полное ИИВ}
+\begin{itemize}
+\item Попробуем увеличить выразительную силу, воспользовавшись изоморфизмом Карри-Ховарда. Рассмотрим полное ИИВ.
+\item Расширим язык: $$\begin{array}{rcll}\Lambda &::=& x\ |\ (\Lambda\ \Lambda)\ |\ (\lambda x.\Lambda)\ \\
+& | & \langle\Lambda,\Lambda\rangle\ |\ (\pi_L\ \Lambda)\ |\ (\pi_R\ \Lambda) & \text{термы для }\&\\
+& | & (In_L\ \Lambda)\ |\ (In_R\ \Lambda)\ |\ (Case\ \Lambda\ \Lambda\ \Lambda) & \text{термы для }\vee\\
+& | &(Absurd\ \Lambda) & \text{термы для }\bot
+\end{array}$$
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Новые связки требуют отдельных правил}
+\begin{itemize}\item Упорядоченная пара в бестиповом лямбда-исчислении.
+$$\text{MkPair} ::= \lambda a.\lambda b.\underbrace{\left(\lambda p.p\ a\ b\right)}_{\text{MkPair a b}}
+\quad\quad\text{Fst} ::= \lambda p.p\ \text{T}
+\quad\quad\text{Snd} ::= \lambda p.p\ \text{F}$$
+\item Какой тип у $\text{MkPair a b}$?
+
+$$\text{MkPair a b} = \lambda p^{\alpha\rightarrow\beta\rightarrow\gamma}.p\ a^{\alpha}\ b^{\beta} : (\alpha\rightarrow\beta\rightarrow\gamma)\rightarrow\gamma$$
+
+\item Тип зависит от типа результата $\gamma$: при левой проекции $\alpha = \gamma$ $$\text{Fst} = \lambda p.p^{(\alpha\rightarrow\beta\rightarrow\gamma)\rightarrow\gamma}\ \text{T}^{\alpha\rightarrow\beta\rightarrow\alpha} : \gamma$$
+
+При правой проекции $\beta = \gamma$: $\text{Snd} = \lambda p.p^{(\alpha\rightarrow\beta\rightarrow\gamma)\rightarrow\gamma}\ \text{F}^{\alpha\rightarrow\beta\rightarrow\beta} : \gamma$
+
+\item Как известно, связки в ИИВ друг через друга не выражаются. Поэтому никакая формула не сможет типизировать упорядоченную пару. 
+Однако, в данном варианте типизации может помочь квантор по $\gamma$ или схема аксиом (правил вывода).
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Дополнительные правила для расширенного языка}
+\begin{enumerate}
+	\item Типизация дизъюнкции (алгебраического типа)\[
+	\infer{\Gamma \vdash In_L \; A: \varphi \vee \psi}{\Gamma\vdash A: \varphi}
+	\quad\quad
+	\infer{\Gamma \vdash In_R \; B: \varphi \vee \psi}{\Gamma\vdash B: \psi}
+	\]\vspace{-0.5cm}
+	\[
+	%\quad\quad
+	\infer{\Gamma \vdash \text{Case} \; L \; f \; g : \tau}{\Gamma \vdash L: \varphi \vee \psi, \;\;\;\; \Gamma \vdash f : \varphi \to \tau, \;\;\;\; \Gamma \vdash g: \psi \to \tau}
+	\]
+
+	\item Типизация конъюнкции (упорядоченной пары)
+	\[
+	\infer{\Gamma \vdash \langle A, B \rangle : \varphi \text{\&} \psi}{\Gamma\vdash A: \varphi && \Gamma\vdash B: \psi}
+	%\]\vspace{-0.5cm}
+	%\[
+	\quad\quad
+	\infer{\Gamma \vdash \text{Fst}\ P : \varphi}{\Gamma \vdash P: \varphi \text{\&} \psi}
+	\quad\quad
+	\infer{\Gamma \vdash \text{Snd}\ P : \psi}{\Gamma \vdash P: \varphi \text{\&} \psi}
+	\]
+
+	\item Типизация лжи
+	\[
+	\infer{\Gamma \vdash \text{Absurd}\ A : \varphi}{\Gamma \vdash A : \bot}
+	\]
+\end{enumerate}
+\end{frame}
+
+\end{document}
