@@ -1,0 +1,425 @@
+\documentclass[aspectratio=169]{beamer}
+\setbeamertemplate{navigation symbols}{}
+\usepackage{graphicx}
+\usepackage{stmaryrd}
+\usepackage[T1,T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{verbatim}
+\usepackage{amsthm}
+\usepackage{bnf}
+\usepackage{tikz}
+\usepackage{enumerate}
+\usepackage{mathtext}
+\usepackage{mathtools}
+\usepackage{mathabx}
+%\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
+\usepackage{proof}
+%\usepackage{paracol}
+%\usepackage{enumitem}
+\usepackage{color}
+\usepackage{colortbl}
+\usepackage{minted}
+%\usepackage{hyperref}
+\usetikzlibrary{graphs}
+\usetikzlibrary{graphs.standard}
+\usetikzlibrary{automata,positioning}
+\usepackage{float}
+
+\begin{document}
+
+%\theoremstyle{dfn}
+\newtheorem{dfn}{Определение}[section]
+\newtheorem{nte}{Замечание}[section]
+
+\newtheorem{axiom}{Аксиома}[section]
+\newtheorem{thm}{Теорема}[section]
+\newtheorem{lmm}[theorem]{Лемма}
+\newtheorem{statement}{Утверждение}[section]
+\newtheorem{oun_paragraph}{Пункт}[section]
+\newtheorem{cons}{Следствие}[section]
+\newtheorem*{exm}{Пример}
+
+\newcommand{\comb}[1]{\operatorname{\bf{\textrm{#1}}}}
+\newcommand{\func}[1]{\operatorname{#1}}
+\newcommand{\reduction}[1]{{\color{OrangeRed}#1}}
+\newcommand{\set}[1]{\left\{#1\right\}}
+
+\def\from#1{\par \parbox{0.7\textwidth}{\par \hfill\raggedleft \it #1}} 
+
+\begin{frame}{}
+\begin{center}\Large Лекция 3.\\ \Large Нормализуемость $\lambda_\rightarrow$.\\Система F\end{center}
+\end{frame}
+
+\begin{frame}{Нормализуемость}
+\begin{dfn}
+\begin{itemize}
+\item Терм $A$ назовём слабо нормализуемым, если существует последовательность редукций,
+приводящих его в нормальную форму.
+\item Терм $A$ назовём сильно нормализуемым, если не существует бесконечной последовательности
+его редукций.
+\item Исчисление назовём сильно нормализуемым, если любой его терм сильно нормализуем.
+\end{itemize}
+\end{dfn}
+
+\vspace{-0.3cm}
+\begin{thm}Бестиповое лямбда-исчисление не является сильно нормализуемым\end{thm}
+\vspace{-0.3cm}
+\begin{proof}$\Omega \rightarrow_\beta \Omega$\end{proof}
+
+\begin{thm}Просто типизированное лямбда-исчисление является сильно нормализуемым\end{thm}
+\end{frame}
+
+\begin{comment}
+\begin{frame}{$SN_\sigma$: сильно нормализуемые термы типа $\sigma$}
+\begin{dfn} Будем записывать $SN_\alpha(T)$, если \begin{enumerate}
+\item $\vdash T : \alpha$
+\item $T$ сильно нормализуем.
+\end{enumerate}\vspace{0.5cm}
+
+$SN_{\sigma\rightarrow\tau}(T)$, если \begin{enumerate}
+\item $\vdash T : \sigma\rightarrow\tau$
+\item $T$ сильно нормализуем
+\item Если $SN_\sigma(P)$, то $SN_\tau(T\ P)$.
+Неформальное пояснение: функция гарантированно заканчивает работу на любых сильно нормализуемых аргументах.
+\end{enumerate}
+
+\end{dfn}
+\end{frame}
+
+\begin{frame}[fragile]{Пример 1}
+
+{\color{gray}$SN_\zeta(T)$, если:
+$\vdash T:\zeta$, $T$ сильно нормализуем, при $\zeta=\sigma\rightarrow\tau$ и $SN_\sigma(P)$
+выполнено $SN_\tau(T\ P)$
+}
+
+\begin{exm}
+$SN_{\alpha\rightarrow\alpha}(\lambda x.x)$:
+\begin{enumerate}
+\item $\vdash \lambda x.x : \alpha\rightarrow\alpha$
+\item $\lambda x.x$ находится в нормальной форме
+\item Каждой цепочке редукций $I\ P$ соответствует цепочка редукций $P$ длины $k-1$ или $k$
+(редукции внутри $P$ оставляем, редукцию $I\ Q \rightarrow_\beta Q$ пропускаем).
+Отсюда, если $SN_\alpha(P)$, то $I\ P$ сильно нормализуемо и $\vdash I\ P : \alpha$.
+\end{enumerate}
+\end{exm}
+\end{frame}
+
+\begin{frame}[fragile]{Пример 2}
+
+\begin{minipage}{10cm}{\color{gray}$SN_\zeta(T)$, если:\\
+ (1) $\vdash T:\zeta$, (2) $T$ сильно нормализуем, \\(3) при $\zeta=\sigma\rightarrow\tau$ и $SN_\sigma(P)$
+выполнено $SN_\tau(T\ P)$}
+\end{minipage}
+
+\begin{exm}
+Важность третьего условия: не обязательно результат подстановки сильно нормализуемого терма 
+в сильно нормализуемый терм сильно нормализуем.
+
+\begin{itemize}
+\item $\lambda x.x\ x$ сильно нормализуем.
+\item Бывает так: $(\lambda x.x\ x)\ I \rightarrow_\beta I\ I \rightarrow_\beta I$
+\item Но бывает и так: $(\lambda x.x\ x)\ (\lambda x.x\ x)$.
+\end{itemize}
+\end{exm}
+
+\end{frame}
+
+\begin{frame}
+\begin{thm}Если $\vdash S:\sigma$ и $S\rightarrow_\beta T$, то $SN_\sigma(S)$ тогда и только тогда, когда $SN_\sigma(T)$.\end{thm}
+\begin{proof}Лемма о редукции типа, индукция по структуре $\sigma$
+
+$(\lambda x.P) Q -> P [x:=Q]$
+Если $\sigma = \alpha$, то $SN_\alpha(T)$ означает, что 
+
+\end{proof}
+\end{frame}
+
+\begin{frame}{Применение типизированного терма к $SN$-аргументам само $SN$}
+Если $\{x_i : \sigma_i\} \vdash Q : \tau$ и $SN_{\sigma_i}(P_i)$, то $SN_\tau(Q[x_1 := P_1,\dots,x_n := P_n])$.
+Индукция по структуре доказательства $x_i : \sigma_i \vdash Q:\tau$.
+\begin{enumerate}
+\item $$\infer{\vdash x_k : \sigma_k}{\{x_i : \sigma_i\}}$$
+\item $$\infer{\Gamma\vdash M\ N : \psi}{\Gamma\vdash M : \varphi\rightarrow\psi\quad\quad N : \psi}$$
+По индукции, $SN_{\varphi\rightarrow\psi}(M[{x_i := P_i}])$. Также, по определению имеем $SN_{\varphi\rightarrow\psi}$.
+Отсюда $SN_\psi(M[{x_i := P_i}]\ N[{x_i := P_i}])$
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Типизированный терм является сильно нормализованым}
+\begin{thm}Если $\vdash T:\tau$, то $T сильно нормализуем.$\end{thm}
+\begin{proof}По вырожденному случаю леммы о применении типизированного терма $SN_\tau(T[])$ (при пустом списке замен).
+Тогда по определению $SN_\tau(T)$ имеем сильную нормализуемость $T$.\end{proof}
+\end{frame}
+\end{comment}
+
+\begin{frame}{Сильно нормализуемые множества}
+\begin{dfn}SN --- множество всех сильно нормализуемых лямбда-термов.
+
+Насыщенное множество $\mathcal{X} \subseteq SN$ --- такое, что: \begin{enumerate}
+\item для любых $n \ge 0$ и $M_1, \dots, M_n \in SN$ $$x\ M_1 \dots M_n \in \mathcal{X}$$
+\item для любых $n \ge 1$, $M_1, \dots, M_n \in SN$ и $N \in \Lambda$ $$N[x := M_1]\ M_2 \dots M_n \in \mathcal{X}\text{ влечёт }(\lambda x.N)\ M_1\ M_2\dots M_n \in \mathcal{X}$$
+\end{enumerate}
+\end{dfn}
+
+\vspace{-0.7cm}
+\begin{lmm}
+$SN$ --- насыщенное. 
+\end{lmm}
+Интересен пункт 2: если $N[x := M_1]\ M_2\dots M_n \in SN$, то $\underline{(\lambda x.N)\ M_1}\ M_2\dots M_n \in SN$. Подстановка подчёркнутого 
+возвращает к редукции посылки, бесконечная <<локальная>> подстановка может быть повторена с посылкой.
+\end{frame}
+
+\begin{frame}{}
+\begin{dfn}
+Если $\mathcal{A},\mathcal{B} \subseteq \Lambda$, то $\mathcal{A} \rightarrow \mathcal{B} = \{ X \in \Lambda\ |\ \forall Y \in \mathcal{A}\ .\ X\ Y \in \mathcal{B}\}$
+\end{dfn}
+
+\begin{exm}
+$\{ \lambda x.\lambda y.x \} \rightarrow \{ X\ |\ X =_\beta \lambda x.\lambda y.y \} = \{ Not, \lambda t.F, Xor\ T, \dots \}$
+\end{exm}
+
+\begin{dfn}
+$$\llbracket \sigma \rrbracket = \left\{\begin{array}{ll}SN, & \sigma = \alpha\\
+  \llbracket \tau_1 \rrbracket \rightarrow \llbracket \tau_2 \rrbracket, & \sigma = \tau_1 \rightarrow \tau_2\end{array}\right.$$
+\end{dfn}
+
+\begin{lmm}
+Если $\mathcal{A}, \mathcal{B}$ насыщены, то $\mathcal{A}\rightarrow\mathcal{B}$ насыщено\\
+$\llbracket\sigma\rrbracket$ насыщено.
+\end{lmm}
+
+\begin{lmm}$\llbracket\sigma\rrbracket\subseteq SN$\end{lmm}
+
+\end{frame}
+
+\begin{frame}{Оценка}
+\begin{dfn}
+Оценка $\rho: \mathcal{V} \rightarrow \Lambda$ --- отображение переменных в лямбда-термы.
+
+$M_\rho := M[x_1 := \rho(x_1), \dots, x_n := \rho(x_n)]$, где $x_i$ --- все свободные переменные $M$.
+
+Будем писать $\rho \models M:\sigma$, если $M_\rho \in \llbracket\sigma\rrbracket$.
+Будем писать $\rho \models \Gamma$, если $\rho(x) \in \llbracket\sigma\rrbracket$ для всех $x : \sigma \in \Gamma$.
+
+$\Gamma \models M:\sigma$, если для любой оценки $\rho$ из $\rho\models\Gamma$ следует $\rho \models M:\sigma$.
+\end{dfn}
+
+\begin{thm}$\Gamma\vdash M:\sigma$ влечёт $\Gamma\models M:\sigma$.
+\end{thm}
+
+Доказательство индукцией по структуре вывода $\Gamma\vdash M:\sigma$ со следующим разбором случаев.
+
+\end{frame}
+
+\begin{frame}{Аксиома}
+Вывод имеет вид:
+
+$$\infer{\Gamma, x : \sigma \vdash x:\sigma}{}$$
+
+Фиксируем $\rho \models \Gamma\cup\{x : \sigma\}$, тогда
+$x_\rho = \rho(x)\in\llbracket\sigma\rrbracket$
+
+Отсюда $\Gamma, x : \sigma \models x : \sigma$
+\end{frame}
+
+\begin{frame}{Применение}
+Вывод имеет вид:
+$$\infer{\Gamma\vdash M\ N:\tau}{\Gamma\vdash M:\sigma\rightarrow\tau\quad\quad\Gamma\vdash N:\sigma}$$
+Фиксируем $\rho \models \Gamma$. По индукционному предположению, $\Gamma\models M:\sigma\rightarrow\tau$ и
+$\Gamma\models N:\sigma$, так что $\rho\models M:\sigma\rightarrow\tau$ и $\rho\models N:\sigma$, что означает, что
+$M_\rho \in \llbracket\sigma\rrbracket\rightarrow\llbracket\tau\rrbracket$ и $N_\rho \in \llbracket\sigma\rrbracket$.
+Тогда $(M\ N)_\rho = M_\rho\ N_\rho \in \llbracket\tau\rrbracket$.
+\end{frame}
+\begin{frame}{Абстракция}
+Вывод имеет вид:
+$$\infer[x \notin FV(\Gamma)]{\Gamma\vdash\lambda x.M : \sigma\rightarrow\tau}{\Gamma,x:\sigma\vdash M:\tau}$$
+
+Пусть $\rho\models\Gamma$.
+Чтобы показать $(\lambda x.M)_\rho \in \llbracket\sigma\rightarrow\tau\rrbracket$, надо для всех $N \in \llbracket\sigma\rrbracket$
+показать $(\lambda x.M)_\rho\ N \in \llbracket\tau\rrbracket$.
+
+Фиксируем $N \in \llbracket\sigma\rrbracket$. Тогда $\rho^{x := N}\models\Gamma,x:\sigma$. 
+По индукционному предположению, $\Gamma,x:\sigma\models M:\tau$, так что $\rho^{x := N}\models M:\tau$ (по определению $\models$).
+То есть, $M_{\rho^{x := N}} \in \llbracket\tau\rrbracket$. Произведём редукцию:
+$$(\lambda x.M)_\rho N = (\lambda x.M)^{y_1 := \rho(y_1), \dots, y_n := \rho(y_n)}\ N \rightarrow_\beta M^{y_1 := \rho(y_1), \dots, y_n := \rho(y_n), x:=N}
+ = M_{\rho^{x := N}}$$
+
+Заметим, $N \in \llbracket \sigma \rrbracket \subseteq SN$ и $M_{\rho^{x := N}} \in \llbracket\tau\rrbracket$.
+Заметим ещё, что $M_{\rho^{x:=N}} = M_\rho[x := N]$.
+По определению насыщенного множества из $M_\rho[x := N] \in \llbracket\tau\rrbracket$ следует требуемое $(\lambda x.M)_\rho\ N \in \llbracket\tau\rrbracket$.
+\end{frame}
+\begin{frame}{Основная теорема}
+\begin{thm}$\Gamma\vdash M:\sigma$ влечёт $M \in SN$\end{thm}
+\begin{proof}
+По предыдущей теореме, $\Gamma\models M:\sigma$. Построим <<тождественную>> оценку, $\rho(x) = x$ для всех $x:\tau \in \Gamma$.
+
+Рассмотрим каждый $x : \tau$ из контекста.
+По лемме выше, $\llbracket\tau\rrbracket$ насыщенное. По определению насыщенного, $x \in \llbracket\tau\rrbracket$.
+Поэтому $\rho\models\Gamma$.
+
+Поскольку $\Gamma\models M:\sigma$, то $M = M_\rho \in \llbracket \sigma \rrbracket$. А по лемме выше, $\llbracket \sigma \rrbracket \subseteq SN$.
+\end{proof}
+\end{frame}
+
+\begin{frame}{О свойстве сильной нормализуемости}
+
+Правило сечения в $S_\infty$ (без одной боковой формулы):
+$$\infer{\sigma}{\sigma\vee\neg\beta\quad\quad\beta}$$
+Или перепишем в привычной грамматике (подобно Modus Ponens):
+$$\infer{\sigma}{\beta\rightarrow\sigma\quad\quad\beta}$$
+И заметим нечто похожее в просто-типизированном лямбда-исчислении:
+$$\infer[\beta-\text{редекс}]{(\lambda x.P)\ Q:\sigma}{(\lambda x.P) : \tau\rightarrow\sigma\quad\quad Q:\tau}$$
+
+Поэтому добавим пункты к изоморфизму Карри-Ховарда:
+\begin{center}\begin{tabular}{l|l}
+Логика & $\lambda_\rightarrow$ \\\hline
+Правило сечения, M.P. & Бета-редекс\\
+Устранение сечения & Бета-редукция\\
+Теорема об устранении сечений & Нормализуемость
+\end{tabular}\end{center}
+
+\end{frame}
+
+\begin{frame}{ИИП второго порядка}
+\begin{itemize}
+\item Алфавит: $a-z$, $\vee$, $\&$, $\rightarrow$, $\neg$, $\forall$, $\exists$.
+\item Метапеременные: $\alpha$ для формул, $p,x,y,z$ для переменных.
+\item $F ::= p\ |\ (F\star F)\ |\ (\forall p.F)\ |\ (\exists p.F)\ |\ \bot$
+\item Сокращения записи: приоритеты как в ИИВ, подкванторное выражение продолжается направо настолько, насколько возможно.
+\end{itemize}
+
+\begin{exm}
+$\forall p.\forall q.p \rightarrow q \rightarrow p$
+\end{exm}
+\end{frame}
+
+\begin{frame}{Теория доказательств}
+    Правила вывода совпадают с правилами для ИИВ, добавлены 4 новых:
+
+    \[ \dfrac{\Gamma\vdash\varphi}{\Gamma\vdash\forall p.\varphi} (p\notin FV(\Gamma)) \qquad
+        \dfrac{\Gamma\vdash\forall p.\varphi}{\Gamma\vdash\varphi[p:=\theta]} \]
+
+
+    \[ \dfrac{\Gamma\vdash\varphi[p := \theta]}{\Gamma\vdash\exists p.\varphi} \qquad
+       \dfrac{\Gamma\vdash\exists p.\varphi\quad\Gamma,\varphi\vdash\psi}{\Gamma\vdash\psi} (p \notin FV(\Gamma,\psi)) \]
+\end{frame}
+
+\begin{frame}{Теория моделей}
+Простая неполная модель.
+
+$$V = \{ \text{И}, \text{Л} \}$$
+
+%\begin{center}
+%	 	$\llbracket p\rrbracket=p$, т. е. $\llbracket p\rrbracket^{p = x} = x$ \\
+%\end{center}
+ 	
+ 	
+ \begin{center}
+ 		\begin{equation*}
+ 		\llbracket P\rightarrow Q\rrbracket = 
+ 		\begin{cases}
+ 			\text{Л}, \llbracket P\rrbracket = \text{И}, \llbracket Q\rrbracket = \text{Л} \\
+ 			\text{И}, \text{иначе}
+ 		\end{cases}
+ 	\end{equation*}
+ \end{center}
+ 	
+ 	
+ 	\begin{equation*}
+ 		\llbracket\forall p.Q\rrbracket = 
+ 		\begin{cases}
+ 			\text{И}, \llbracket Q\rrbracket^{p:=\text{Л, И}} = \text{И} \\
+ 			\text{Л}, \text{иначе}
+ 		\end{cases}
+ 	\end{equation*}
+% 	Эта модель корректна, но не полна.
+
+
+\end{frame}
+
+\begin{frame}[fragile]{Выразимость всех связок через $\forall$, $\rightarrow$}
+Заметим, что достаточно определить связки $\forall$ и $\rightarrow$.\vspace{0.5cm}
+
+\begin{tabular}{ll}
+ Связка & Способ выразить \\
+ $\alpha\&\beta$ & $\forall p.(\alpha\rightarrow\beta\rightarrow p)\rightarrow p$\\
+ $\alpha\vee\beta$ & $\forall p.(\alpha\rightarrow p)\rightarrow (\beta\rightarrow p) \rightarrow p$\\
+ $\bot$ & $\forall p.p$ \\
+ $\exists p.\varphi$ & $\forall f.(\forall p.\varphi\rightarrow f) \rightarrow f$
+\end{tabular}
+
+\vspace{0.5cm}
+С так определёнными связками оказывается возможно показать все правила вывода.
+Например, примем $\alpha\&\beta$ за $\forall p.(\alpha\rightarrow\beta\rightarrow p)\rightarrow p$ и покажем,
+что из $\alpha\&\beta$ следует $\alpha$:
+$$\infer{\alpha}{
+    \infer{\vdash\alpha\rightarrow\beta\rightarrow\alpha}{\infer{\alpha\vdash\beta\rightarrow\alpha}{\infer{\alpha,\beta\vdash\alpha}{}}}\quad\quad
+    \infer[p := \alpha]{\vdash(\alpha\rightarrow\beta\rightarrow \alpha)\rightarrow \alpha}{\vdash\forall p.(\alpha\rightarrow\beta\rightarrow p)\rightarrow p}
+}$$
+
+\end{frame}
+
+\begin{frame}[fragile]{Система F}
+\begin{dfn}
+        Типы в системе F:
+ 	\begin{equation*}
+ 	\tau =
+ 	\begin{cases}
+ 	\alpha,\beta,\gamma ...\quad(\text{атомарные типы}) \\
+ 	\tau\rightarrow\tau \\
+ 	\forall\alpha.\tau\qquad(\alpha\text{ - переменная})
+ 	\end{cases}
+ 	\end{equation*}
+ \end{dfn}
+
+ \begin{dfn}
+        Пред-лямбда-терм в системе F (типизировано по Чёрчу):
+ 	\begin{center}
+ 		$F ::= x\ |\ (\lambda x^{\tau}.F)\ |\ (F\ F)\ |\ (\Lambda\alpha.F)\ |\ (F\ \tau)$ 
+ 	\end{center}
+ \end{dfn}
+\end{frame}
+
+\begin{frame}[fragile]{Типовая абстракция и применение}
+   Примеры соответствующих конструкций из C++.
+   \begin{itemize}
+    \item Типовая абстракция, $\Lambda \tau.W$:
+    \begin{verbatim}
+template<typename t>
+class W {
+    t x;
+}
+    \end{verbatim}
+ 	
+    \item Типовое применение, $W\ int$:
+    \begin{verbatim}
+W<int> w_test;
+    \end{verbatim}
+  \end{itemize}
+\end{frame}
+ 	
+\begin{frame}
+ 	В системе F определены следующие правила вывода: \\ \\
+  	\noindent
+ 	{$\dfrac{}{\Gamma,x:\tau\vdash x:\tau}\qquad\qquad$} 
+ 	{$\dfrac{\Gamma\vdash M:\sigma\rightarrow\tau\qquad\Gamma\vdash N:\sigma}{\Gamma\vdash M N:\tau}$}\\  \\ \\
+ 	{$\dfrac{\Gamma,x:\tau\vdash M:\sigma}{\Gamma\vdash\lambda x^{\tau}.M:\tau\rightarrow\sigma}\quad(x\notin FV(\Gamma))$}\\ \\ \\
+ 	{$\dfrac{\Gamma\vdash M:\sigma}{\Gamma\vdash\Lambda\alpha.M:\forall\alpha.\sigma}\quad(\alpha\notin FV(\Gamma))\qquad$}
+ 	 $\dfrac{\Gamma\vdash M:\forall\alpha.\sigma}{\Gamma\vdash M\tau:\sigma[\alpha:=\tau]}$
+ 	\\
+ 	
+    \emph{Начнем с $\beta$-редукции:}
+    \begin{enumerate}
+        \item Типовая $\beta$-редукция: $(\Lambda\alpha.M^{\sigma})\tau\rightarrow_\beta M[\alpha:= \tau]:\sigma[\alpha:= \tau]$
+        \item Классическая $\beta$-редукция: $(\lambda x^{\sigma}.M)^{\sigma\rightarrow\tau}X\rightarrow_\beta M[x:=X]:\tau$ 
+    \end{enumerate}
+ 	
+\end{frame}
+
+\end{document}
