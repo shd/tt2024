@@ -232,4 +232,43 @@ $$\infer[\text{Введ. }\with]{\Gamma\vdash \alpha\with \beta}{\Gamma\vdash \a
 что система окажется несовместной).
 \end{enumerate}
 
+\section*{Домашнее задание №3: сильная нормализуемость $\lambda_\rightarrow$, система $F$}
+\begin{enumerate}
+\item Найдите $\llbracket\alpha\rightarrow\alpha\rrbracket$.
+\item Найдите $\llbracket(\alpha\rightarrow\alpha)\rightarrow\alpha\rrbracket$.
+\item Покажите, что SN --- насыщенное (постройте полноценное рассуждение по индукции для п.2 определения).
+\item Покажите, что если $\mathcal{A}$ и $\mathcal{B}$ насыщены, то $\mathcal{A}\rightarrow\mathcal{B}$ насыщенное.
+
+\item Покажите, что построенная на лекции простая модель для ИИП второго порядка неполна.
+\item Напомним, что мы можем задать $\exists p.\varphi$ как $\forall q.(\forall p.\varphi\rightarrow q)\rightarrow q$
+(где $q$ --- некоторая свежая переменная).
+Покажите, что правила для квантора существования могут быть выведены из такого определения.
+\item Требуется ли свобода для подстановки в правилах с квантором?
+
+    \[ \dfrac{\Gamma\vdash\varphi[p := \theta]}{\Gamma\vdash\exists p.\varphi} \qquad
+        \dfrac{\Gamma\vdash\forall p.\phi}{\Gamma\vdash\phi[p:=\theta]} \]
+
+Если да --- приведите пример доказуемой при отсутствии свободы для подстановки, но некорректной формулы. 
+Если нет --- предложите доказательство корректности правил при любых подстановках.
+
+\item Пусть $\Gamma\vdash\varphi$. Всегда ли можно перестроить доказательство $\varphi$, добавив ещё одну гипотезу:
+$\Gamma,\psi\vdash\varphi$? Если нет, каковы могли бы быть ограничения на $\psi$?
+
+\item Пусть $\Gamma\vdash\forall x.\varphi$. Верно ли тогда, что $\Gamma\vdash\forall y.\varphi[x := y]$? 
+Если это неверно в общем случае, возможно, это верно при каких-то ограничениях? В случае наличия ограничений
+приведите надлежащие контрпримеры.
+
+\item Перенесите в систему $F$ из бестипового лямбда-исчисления следующие функции --- иными словами,
+постройте их обобщение для системы $F$ (приведите обобщённое выражение, укажите его тип и докажите его).
+Например, можно рассмотреть $I = \Lambda \pi.\lambda p^\pi.p \rightarrow p$. 
+\begin{enumerate}
+\item S, K.
+\item инъекции и $case$ (операции с алгебраическим типом);
+\item истина, ложь, исключающее или;
+\item черчёвский нумерал (он должен иметь тип $\forall\alpha.(\alpha\rightarrow\alpha)\rightarrow(\alpha\rightarrow\alpha)$) и инкремент;
+\item возведение в степень: $\lambda m.\lambda n.n\ m$;
+\item вычитание единицы (трюк зуба мудрости) и вычитание.
+\end{enumerate}
+\end{enumerate}
+
 \end{document}
