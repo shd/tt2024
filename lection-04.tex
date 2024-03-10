@@ -1,0 +1,417 @@
+\documentclass[aspectratio=169]{beamer}
+\setbeamertemplate{navigation symbols}{}
+\usepackage{graphicx}
+\usepackage{stmaryrd}
+\usepackage[T1,T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{verbatim}
+\usepackage{amsthm}
+\usepackage{bnf}
+\usepackage{tikz}
+\usepackage{enumerate}
+\usepackage{mathtext}
+\usepackage{mathtools}
+\usepackage{mathabx}
+%\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
+\usepackage{proof}
+%\usepackage{paracol}
+%\usepackage{enumitem}
+\usepackage{color}
+\usepackage{colortbl}
+%\usepackage{minted}
+%\usepackage{hyperref}
+\usetikzlibrary{graphs}
+\usetikzlibrary{graphs.standard}
+\usetikzlibrary{automata,positioning}
+\usepackage{float}
+
+\begin{document}
+
+%\theoremstyle{dfn}
+\newtheorem{dfn}{Определение}[section]
+\newtheorem{nte}{Замечание}[section]
+
+\newtheorem{axiom}{Аксиома}[section]
+\newtheorem{thm}{Теорема}[section]
+\newtheorem{lmm}[theorem]{Лемма}
+\newtheorem{statement}{Утверждение}[section]
+\newtheorem{oun_paragraph}{Пункт}[section]
+\newtheorem{cons}{Следствие}[section]
+\newtheorem*{exm}{Пример}
+
+\newcommand{\comb}[1]{\operatorname{\bf{\textrm{#1}}}}
+\newcommand{\func}[1]{\operatorname{#1}}
+\newcommand{\reduction}[1]{{\color{OrangeRed}#1}}
+\newcommand{\set}[1]{\left\{#1\right\}}
+
+\def\from#1{\par \parbox{0.7\textwidth}{\par \hfill\raggedleft \it #1}} 
+
+\begin{frame}{}
+\begin{center}\Large Лекция 4.\\ \Large Экзистенциальные типы \\ Типовая система Хиндли-Милнера\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Абстрактные типы данных}
+	%Объектно-ориентированные типы данных = абстрактные типы данных + наследование.
+	%Значит, АТД = ООП - наследование.
+	%Напомним, запись $a.method(...)$ --- другая запись для $method (a, ...)$.
+
+	Стек $\alpha$ из значений типа $\upsilon$: контейнер, соответствующий интерфейсу
+
+	\begin{center}\begin{tabular}{lll}
+	метод & тип & комментарий\\\hline
+	\verb!empty! & $\alpha$ & (конструктор)\\
+	\verb!push! & $\upsilon \rightarrow \alpha \rightarrow \alpha$\\
+	\verb!pop! & $\alpha \rightarrow \alpha \& \upsilon$
+	\end{tabular}\end{center}
+
+	%Стек: $s = empty(); s.push(5); s.push(12); while (!s.empty()) s.pop()$
+	Возможны разные реализации интерфейса.\vspace{0.5cm}
+
+	\textbf{Замечание}:  Мы понимаем АТД как набор функций, без собственных данных.
+	Напомним, что \verb!a.method(...)! --- другая запись для \verb!method(a, ...)!.
+\end{frame}
+
+\begin{frame}[fragile]{Пример определения и применения АТД}
+\begin{verbatim}
+abstype stack with 
+    empty : stack
+    push : int * stack -> stack
+    pop : stack -> stack * int
+is pack Maybe Int,
+    empty = None
+    push (n,s) = Some n
+    pop s = case s with None -> 0 | Some v -> v
+in
+    stack::pop(stack::push(12,stack::empty))
+\end{verbatim}
+\end{frame}
+
+\begin{frame}{Экзистенциальные типы}
+	Экзистенциальный тип --- тип, соответствующий квантору существования в смысле изоморфизма Карри-Ховарда.
+	Соответствует абстрактному типу данных.
+
+	 $$\dfrac{\Gamma\vdash\varphi[\alpha:=\theta]}{\Gamma\vdash\exists\alpha.\varphi}\quad\quad
+	  \dfrac{\Gamma\vdash\exists\alpha.\varphi\qquad\Gamma,\varphi\vdash\psi}{\Gamma\vdash\psi}$$
+
+	АТД имеет интерфейс $\varphi$, тип АТД $\alpha$ реализуется типом $\theta$, а сам интерфейс --- термом $M$:
+
+	$$\dfrac{\Gamma \vdash M : \varphi[\alpha := \theta]}{\Gamma\vdash (\text{pack } M, \theta \text{ to } \exists \alpha . \varphi) : \exists \alpha.\varphi}$$
+
+	... и если вычисление $N:\psi$ работает при условии наличия какой-то реализации АТД $x:\varphi$ в контексте, то нам достаточно
+	АТД $P:\exists\alpha.\varphi$ для получения результата:
+
+	$$\dfrac{\Gamma \vdash P : \exists \alpha . \varphi\qquad\Gamma, x : \varphi \vdash N : \psi}{\Gamma \vdash \text{abstype } \alpha \text{ with } x:\varphi \text{ is } P \text{ in } N:\psi}
+	(\alpha \notin FV(\Gamma, \psi))$$
+
+
+	%  Предположим, что у нас есть стек с хранилищем типа $\alpha$, у которого определены следующие операции:\\
+	% \textbf{empty}: $\alpha$\\
+	% \textbf{push}: $\alpha\&\nu\rightarrow\alpha$\\
+	% \textbf{pop}: $\alpha\rightarrow\alpha\&\nu$\\
+	 
+	% Интерфейс стека: stack$\equiv\alpha\&(\alpha\&\nu\rightarrow\alpha)\&(\alpha\rightarrow\alpha\&\nu)$.
+        %Что такое $\alpha$? Неважно, детали опустим:\\$\exists\alpha.\alpha\&(\alpha\&\nu\rightarrow\alpha)\&(\alpha\rightarrow\alpha\&\nu)$
+\end{frame}
+	 
+\begin{frame}[fragile]{Стек в $F$}
+
+	$$\dfrac{\Gamma \vdash M : \varphi[\alpha := \theta]}{\Gamma\vdash (\text{pack } M, \theta \text{ to } \exists \alpha . \varphi) : \exists \alpha.\varphi}\quad
+	\dfrac{\Gamma \vdash P : \exists \alpha . \varphi\qquad\Gamma, x : \varphi \vdash N : \psi}{\Gamma \vdash \text{abstype } \alpha \text{ with } x:\varphi \text{ is } P \text{ in } N:\psi}$$
+%	(\alpha \notin FV(\Gamma, \psi))$$
+
+	Интерфейс стека (возьмём $\upsilon$ как чёрчевский нумерал):
+
+	$$\varphi := (\underbrace{\alpha}_{empty}\&\underbrace{(\upsilon\&\alpha\rightarrow\alpha)}_{push})\&\underbrace{(\alpha\rightarrow\alpha\&\upsilon)}_{pop}$$
+
+	Какое-нибудь вычисление --- скажем, \verb!pop(push(12,empty))!:
+
+	$$x : \varphi\vdash \underbrace{\pi_R \left((\pi_R x) ((\pi_R (\pi_L x)) \langle 12, \pi_L (\pi_L x)\rangle)\right)}_{N}:\upsilon$$
+
+	И простая реализация, для $\theta := (\gamma\rightarrow\gamma)\vee\upsilon$ --- это \verb!Maybe Int!:
+
+	$$\vdash \langle \langle (In_L\ \lambda x.x), \lambda n.In_R\ (\pi_L\ n)\rangle, \lambda n.\texttt{case }(\lambda x.0)\ (\lambda x.x)\ n\rangle : \varphi[\alpha := \theta]$$
+%$\vdash M : \varphi$
+
+	$ $
+
+        %let (stk, v) = pop (push 12 $ push 5 empty) in
+        %let (stk2, v2) = pop stk in 
+        %v + v2
+
+\end{frame}
+
+\begin{frame}{Раскрываем $\exists$ через $\forall$}
+Напомним, что $\exists\alpha.\varphi := \forall \beta.(\forall\alpha.\varphi\rightarrow\beta)\rightarrow \beta$.
+
+	$$\dfrac{\Gamma \vdash M : \varphi[\alpha := \theta]}{\Gamma\vdash (\text{pack } M, \theta \text{ to } \exists \alpha . \varphi) : \exists \alpha.\varphi}$$
+
+Перепишем это правило только через базовые конструкции системы $F$:
+
+$$\dfrac{\Gamma\vdash M : \varphi[\alpha:=\theta]}{\Gamma\vdash\Lambda \beta.\lambda e^{\forall \alpha.\varphi\rightarrow\beta}.(e\ \theta)\ M : \forall \beta.(\forall \alpha.\varphi\rightarrow\beta)\rightarrow \beta}$$
+
+<<Пусть есть вычисление $e$, использующее АТД $\alpha$ с интерфейсом $\varphi$, возвращающее $\beta$. 
+Тогда, имея конкретный тип реализации АТД $\theta$ и саму реализацию АТД $M : \varphi[\alpha:=\theta]$,
+то с помощью вычисления $e$ возможно вычислить результат и вернуть значение типа $\beta$>>. 
+
+Сравните с \texttt{case} для алгебраического типа и вспомните действия редактора связей (линкера).
+%(\Lambda \alpha.\lambda m^\varphi.M\ m)\ M$
+
+\end{frame}
+
+\begin{frame}{Раскроем \texttt{abstype}}
+
+	$$\dfrac{\Gamma \vdash P : \exists \alpha . \varphi\qquad\Gamma, x : \varphi \vdash N : \psi}{\Gamma \vdash \text{abstype } \alpha \text{ with } x:\varphi \text{ is } P \text{ in } N:\psi}$$
+
+Перепишем это правило через базовые конструкции системы $F$:
+
+$$\dfrac{\Gamma\vdash P:\forall \beta.(\forall \alpha.\varphi\rightarrow\beta)\rightarrow\beta\qquad\Gamma,x:\varphi\vdash N:\psi}
+        {\Gamma\vdash (P\ \psi)\ (\Lambda \alpha.\lambda x^\varphi.N) : \psi}$$
+
+Вспомним pack:
+
+$$\dfrac{\Gamma\vdash M : \varphi[\alpha:=\theta]}{\Gamma\vdash\Lambda \beta.\lambda e^{\forall \alpha.\varphi\rightarrow\beta}.(e\ \theta)\ M : \forall \beta.(\forall \alpha.\varphi\rightarrow\beta)\rightarrow \beta}$$
+
+Результат:
+
+\begin{center}\begin{tabular}{l}
+$((\Lambda \beta.\lambda e^{\forall \alpha.\varphi\rightarrow\beta}.(e\ \theta)\ M)\ \psi)\ (\Lambda \alpha.\lambda x^\varphi.N) \rightarrow_\beta$\\
+$(\lambda e^{\forall \alpha.\varphi\rightarrow\psi}.(e\ \theta)\ M)\ (\Lambda \alpha.\lambda x^\varphi.N) \rightarrow_\beta$\\
+$(\Lambda \alpha.\lambda x^\varphi.N)\ \theta\ M \rightarrow_\beta$\\
+$(\lambda x^{\varphi[\alpha:=\theta]}.N[\alpha:=\theta])\ M \rightarrow_\beta N[\alpha:=\theta][x := M]$
+\end{tabular}\end{center}
+
+\end{frame}
+
+\begin{frame}[fragile]{Пример реализации на Хаскеле}
+\footnotesize
+\begin{verbatim}
+{-# LANGUAGE RankNTypes #-}
+data AbstractStack = AS (forall b . (forall a . 
+     ( a, Integer -> a -> a, a -> (a, Integer) ) 
+     -> b) -> b)
+
+abstype :: AbstractStack -> Integer
+abstype stack =
+  case stack of
+    AS r -> r x where
+      x (empty, push, pop) =
+        let (stk, v) = pop (push 12 $ push 5 empty) in
+        let (stk2, v2) = pop stk in 
+        v + v2
+
+packedStack :: AbstractStack
+packedStack = AS (\t -> t ( [], \i -> \l -> i:l, \(i:l) -> (l,i) ) )
+
+main = do print (abstype packedStack)
+\end{verbatim}
+\end{frame}
+
+\begin{frame}{Общие свойства системы $F$}
+%\begin{thm}
+В системе $F$ (в варианте по Чёрчу, так и в варианте по Карри) имеют место теорема Чёрча-Россера и сильная нормализация.\vspace{0.5cm}
+%\end{thm}
+
+Разрешимость задач типизации системы $F$:
+
+\begin{center}\begin{tabular}{l|ll}
+ & По Чёрчу & По Карри \\\hline
+$\Gamma \vdash M:\sigma$ & да & нет\\
+$\Gamma \vdash M:\ ?$ & да & нет\\
+$\Gamma \vdash\ ? : \sigma$ & нет & нет\\
+$? \vdash M:\sigma$ & нет & нет\\
+$? \vdash M :\ ?$ & нет & нет
+\end{tabular}\end{center}
+\end{frame}
+
+\begin{frame}{Ранг типа}
+Напомним, что $\exists\alpha.\varphi := \forall \beta.(\forall\alpha.\varphi\rightarrow\beta)\rightarrow\beta$.
+\begin{dfn}Функция <<ранг типа>> $rk \subseteq T \times \mathbb{N}_0$. $rk(\sigma) = [mrk(\sigma),+\infty)\cap\mathbb{N}_0$, где $mrk$:
+%Зададим как функцию $rk: \tau \rightarrow \mathcal{P}(\mathbb{N}_0)$:
+%$$rk(\tau) = \left\{\begin{array}{ll}
+%\mathbb{N}_0 & \tau\text{ без кванторов}\\
+%rk(\sigma) \setminus \{0\} & \tau = \forall x.\sigma\\
+%\{ r + 1\ |\ r \in rk(\sigma_1)\} \cap rk(\sigma_2) & \tau = \sigma_1\rightarrow\sigma_2 
+%\end{array}\right.$$
+
+$$mrk(\tau)=\left\{\begin{array}{ll}
+0, &\tau \text{ без кванторов}\\
+\max(mrk(\sigma),1), &\tau = \forall x.\sigma\\
+\max(mrk(\sigma_1)+1,mrk(\sigma_2)), & \tau = \sigma_1\rightarrow\sigma_2
+\end{array}\right.
+$$
+\end{dfn}\vspace{-0.5cm}
+
+\begin{lmm}
+%\begin{enumerate}
+%\item Если $rk(\tau,r)$, то $rk(\tau,s)$ для всех $s > r$;
+Если $rk(\sigma,1)$, то для формулы $\sigma$ найдётся эквивалентная формула с поверхностными кванторами.
+%\end{enumerate}
+\end{lmm}
+
+\begin{exm}
+$0 \notin rk(\forall\alpha.\gamma\rightarrow\beta)$; $1 \notin rk((\forall\alpha.\gamma\rightarrow\beta)\rightarrow f)=\{2,3,\dots\}$\\
+$1 \notin rk(\exists\alpha.\gamma) = rk(\forall\beta.(\forall\alpha.\gamma\rightarrow\beta)\rightarrow\beta) = \{2,3,\dots\}$\\
+$1 \in rk(\forall\alpha.\delta\rightarrow\forall\beta.\delta\rightarrow\forall\gamma.\delta)$
+%$(\forall x.\alpha)\rightarrow(\forall x.\beta)$ не имеет эквивалентной формулы с поверхностными кванторами.
+\end{exm}
+
+% $$rk(\tau)$$\end{dfn}
+\end{frame}
+
+\begin{frame}{Типовая система Хиндли-Милнера: язык}
+\begin{dfn}Тип $(\tau)$ и типовая схема: $$\tau ::= \alpha\ |\ (\tau\rightarrow\tau)\quad\quad\sigma ::= \forall x.\sigma\ |\ \tau$$%\end{dfn}
+%\begin{dfn}
+Пред-лямбда-терм (типизация по Карри) $$H ::= x\ |\ (H\ H)\ |\ (\lambda x.H)\ |\ (\texttt{let }x=H\texttt{ in }H)$$%\end{dfn}
+%\begin{dfn}
+Редукция для let:
+$$\texttt{let }x=E_1\texttt{ in }E_2\rightarrow_\beta E_2[x := E_1]$$
+\end{dfn}
+
+\begin{exm}
+$$\texttt{let }Inc=\lambda n.\lambda f.\lambda x.n\ f\ (f\ x)\texttt{ in }Inc(Inc\ \overline{0})\twoheadrightarrow_\beta \overline{2}$$
+\end{exm}
+\end{frame}
+
+\begin{frame}{Типовая система Хиндли-Милнера: специализация}
+\begin{dfn}
+
+Пусть $\sigma_1 = \forall \alpha_1. \forall \alpha_2. \dots \forall \alpha_n. \tau_1$.
+Тогда $\sigma_2$ --- частный случай или специализация $\sigma_1$ (обознается как $\sigma_1 \sqsubseteq \sigma_2$), если
+
+$$\sigma_2 =  \forall \beta_1. \forall \beta_2. \dots \forall \beta_m. \tau_1[\alpha_1 := S(\alpha_1),\dots,\alpha_n := S(\alpha_n)]
+\text{ и } \beta_i \notin FV(\forall \alpha_1.\forall\alpha_2.\dots\forall\alpha_n.\tau_1)$$
+
+\end{dfn}
+
+\begin{exm}\
+
+$\forall \alpha.\alpha \rightarrow \alpha
+\sqsubseteq
+\forall \beta_1.\forall \beta_2.(\beta_1 \rightarrow \beta_2) \rightarrow (\beta_1 \rightarrow \beta_2)$
+\end{exm}
+\end{frame}
+
+\begin{frame}{Типовая система Хиндли-Милнера: правила вывода}\vspace{-0.7cm}
+    $$\infer[x \not \in FV(\Gamma)]{\Gamma, x : \sigma \vdash x : \sigma}{}\qquad
+    \infer{\Gamma \vdash E_0\ E_1 : \tau'}{\Gamma \vdash E_0 : \tau \rightarrow \tau' \qquad \Gamma \vdash E_1 : \tau}\qquad
+    \infer{\Gamma \vdash \lambda x.E : \tau \rightarrow \tau'}{\Gamma, x : \tau \vdash E : \tau'}$$
+    $$\infer{\Gamma \vdash let\ x = E_0\ in\ E_1 : \tau}{\Gamma \vdash E_0 : \sigma \qquad \Gamma, x : \sigma \vdash E_1 : \tau}\qquad
+    \infer[\sigma' \sqsubseteq \sigma]{\Gamma \vdash E : \sigma}{\Gamma \vdash E : \sigma'}\qquad
+    \infer[\alpha \not \in FV(\Gamma)]{\Gamma \vdash E : \forall \alpha.\sigma}{\Gamma \vdash E : \sigma}$$
+
+%$$let\ x = a\ in\ b =_\beta (\lambda x.b)\ a$$
+
+\vspace{-0.1cm}
+\begin{exm}
+\end{exm}\vspace{-0.8cm}
+$$
+\infer{\vdash\lambda x.x:\forall\alpha.\alpha\rightarrow\alpha}{\infer{\vdash\lambda x.x:\alpha\rightarrow\alpha}{\infer{x:\alpha\vdash x:\alpha}{}}}
+$$
+\vspace{-0.3cm}
+$$\infer{\texttt{id}:\forall\alpha.\alpha\rightarrow\alpha\vdash\texttt{id}\ 0:\texttt{int}}
+        {\infer[S(\alpha)=\texttt{int}]{\texttt{id}:\forall\alpha.\alpha\rightarrow\alpha\vdash\texttt{id}:\texttt{int}\rightarrow\texttt{int}}
+               {\infer{\texttt{id}:\forall\alpha.\alpha\rightarrow\alpha\vdash\texttt{id}:\forall\alpha.\alpha\rightarrow\alpha}{}}\qquad
+         \texttt{id}:\forall\alpha.\alpha\rightarrow\alpha\vdash 0:\texttt{int}}
+$$
+
+
+Отсюда: $\texttt{let id=}\lambda x.x\text{ in }\langle \texttt{id }0,\texttt{id <<a>>}\rangle:\texttt{int}\&\texttt{string}$
+
+\end{frame}
+
+\begin{frame}{Алгоритм реконструкции типа W}
+На вход подаются $\Gamma,\ M$, на выходе наиболее общая пара: $\langle S, \tau \rangle = W(\Gamma,M)$
+\begin{enumerate}
+    \item $M = x ,\ x:\tau  \in \Gamma$ (иначе ошибка)
+    \begin{itemize}
+        \item $\tau'$ --- $\tau$ без кванторов, все свободные переменные переименованы в свежие.
+        %Например: $\forall \alpha_1.\phi \Rightarrow \phi[\alpha_1 := \beta_1]$, где $\beta_1$ --- свежая переменная
+    \end{itemize}
+    возвращаем $\langle\emptyset, \tau'\rangle$; например, $W(\{x:\forall \alpha.\varphi, y:\beta\}, x) = \langle\emptyset,\varphi[\alpha:=\gamma]\rangle$
+    \item $M = \lambda n.E$
+    \begin{itemize}
+        \item $\Gamma' = \{x : \sigma\ |\ x:\sigma \in \Gamma, x \ne n\} \cup \{n : \alpha\}$, $\alpha$ --- свежая типовая переменная
+        \item $\langle S,\ \tau \rangle = W(\Gamma', E)$
+    \end{itemize}
+    возвращаем $\langle S, S(\alpha) \rightarrow \tau\rangle$
+    \item $M = P\ Q$
+    \begin{itemize}
+        \item $\langle S_1, \tau_1 \rangle = W(\Gamma, P)$; $\langle S_2, \tau_2 \rangle = W(S_1(\Gamma), Q)$
+        \item $S_3 = \mathcal{U}\big[S_2(\tau_1), \tau_2 \rightarrow \alpha\big]$, $\alpha$ --- свежая
+    \end{itemize}
+    возвращаем $\langle S_3 \circ S_2 \circ S_1, S_3(\alpha) \rangle$
+    \item $M = (let\ n = P\ in\ Q)$
+    \begin{itemize}
+        \item $\langle S_1, \tau_1\rangle = W(\Gamma, P)$
+        \item $\Gamma' = \{x:\sigma\ |\ x:\sigma\in\Gamma,x \ne n\} \cup \{ n : \forall \alpha_1 \dots \alpha_k. \tau_1 \}$, где $\alpha_1 \dots \alpha_k$ --- все свободные переменные $\tau_1$
+        \item $\langle S_2, \tau_2\rangle = W(S_1(\Gamma'), Q)$
+    \end{itemize}
+    возвращаем $\langle S_2 \circ S_1, \tau_2 \rangle$
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Рекурсия в HM: делаем HM тьюринг-полной}
+
+\begin{enumerate}
+\item Рекурсия для термов. $Y$-комбинатор. Добавим специальное правило вывода:
+
+$$\infer{Y : \forall \alpha.(\alpha\rightarrow\alpha)\rightarrow\alpha}{}$$
+
+\item Рекурсия для типов. Рассмотрим список
+
+\vspace{-0.2cm}
+$$\texttt{Nil} = In_L\ 0\qquad \texttt{Cons}\ e\ l = In_R \langle e,l \rangle\qquad \texttt{List} :\ ?$$
+
+Заметим, что при попытке выписать уравнение для типа мы получим рекурсию:
+
+\vspace{-0.5cm}
+$$\tau = \texttt{Int} \vee \langle \texttt{Int}, \tau \rangle$$
+
+Рекурсивный тип надо добавить явно: $$\tau = \mu \alpha.\texttt{Int}\vee\langle\texttt{Int},\alpha\rangle$$
+Мю-оператор --- это Y-комбинатор для типов. Как его добавить в типовую систему?
+
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]{Эквирекурсивные и изорекурсивные типы: $\mu\alpha.\sigma(\alpha)$}
+\begin{itemize}
+\item Эквирекурсивные типы. Считаем, что $\alpha = \sigma(\alpha)$.
+Например, в Java:
+\begin{verbatim}
+public abstract class Enum<E extends Enum<E>>
+        implements Constable, Comparable<E>, Serializable 
+{ ... }
+\end{verbatim}
+
+Уравнение (частный случай): $E = Enum(E)$, или $E = \mu \varepsilon . Enum(\varepsilon)$.
+
+\item Изорекурсивные типы. $\alpha \ne \sigma(\alpha)$, но есть изоморфизм:
+ $$\texttt{roll}: \sigma(\alpha)\rightarrow\alpha\quad\quad\texttt{unroll}: \alpha\rightarrow\sigma(\alpha)$$
+
+Например, для \verb!struct List { List* next; int value; }!:
+
+\begin{center}\begin{tabular}{lll}
+Комп. & В C++ & Пример \\\hline
+\verb!roll! & взятие ссылки & \small\verb!List a; a.next = NULL; return len(!\color{blue}\verb!&a!\color{black}\verb!)!\\
+\verb!unroll! & разыменование & \small\verb!len (List* a) { return (!\color{blue}\verb!*a!\color{black}\verb!).next ? ... : 0 }!
+\end{tabular}\end{center}
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Разрешимость задачи реконструкции типа в разных вариантах $F$}
+\begin{tabular}{lll}
+Ранг типов & Собственное название & Разрешимость\\\hline
+0 & $\lambda_\rightarrow$ & разрешимо (лекция 2)\\
+1 & $HM$ & разрешимо (алгоритм $W$)\\
+2 & & разрешимо\\
+$\ge3$ & & неразрешимо
+\end{tabular}
+\end{frame}
+
+\end{document}
