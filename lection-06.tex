@@ -1,0 +1,434 @@
+\documentclass[aspectratio=169,dvipsnames,usenames]{beamer}
+\setbeamertemplate{navigation symbols}{}
+\usepackage{graphicx}
+\usepackage{stmaryrd}
+\usepackage[T1,T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{verbatim}
+\usepackage{amsthm}
+\usepackage{bnf}
+\usepackage{enumerate}
+\usepackage{mathtext}
+\usepackage{mathtools}
+\usepackage{mathabx}
+%\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
+\usepackage{proof}
+%\usepackage{paracol}
+%\usepackage{enumitem}
+\usepackage{xcolor}
+%\usepackage{colortbl}
+%\usepackage{minted}
+%\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usetikzlibrary{graphs}
+\usetikzlibrary{graphs.standard}
+\usetikzlibrary{automata,positioning}
+\usepackage{float}
+
+\begin{document}
+
+%\theoremstyle{dfn}
+\newtheorem{dfn}{Определение}[section]
+\newtheorem{nte}{Замечание}[section]
+
+\newtheorem{axiom}{Аксиома}[section]
+\newtheorem{thm}{Теорема}[section]
+\newtheorem{lmm}[theorem]{Лемма}
+\newtheorem{statement}{Утверждение}[section]
+\newtheorem{oun_paragraph}{Пункт}[section]
+\newtheorem{cons}{Следствие}[section]
+\newtheorem*{exm}{Пример}
+
+\newcommand{\comb}[1]{\operatorname{\bf{\textrm{#1}}}}
+\newcommand{\func}[1]{\operatorname{#1}}
+\newcommand{\reduction}[1]{{\color{OrangeRed}#1}}
+\newcommand{\set}[1]{\left\{#1\right\}}
+
+\def\from#1{\par \parbox{0.7\textwidth}{\par \hfill\raggedleft \it #1}} 
+
+\begin{frame}{}
+\begin{center}\Large Лекция 6. \\Язык Аренд \\Изоморфизм Карри-Ховарда-Воеводского.\\Гомотопическая теория типов\end{center}
+\end{frame}
+
+\begin{frame}{О языке Аренд}
+\begin{itemize}
+\item Разработан в Jet Brains.
+\item Назван в честь Аренда Гейтинга (Arend Heyting, 9 мая 1898, Амстердам — 9 июля 1980, Лугано) --- буква <<H>> из BHK-интерпретации.
+\item Язык сейчас исключительно для доказательств математических фактов: в отличие, например, от Coq ---
+широко применяется для верификации софта, может использоваться для построения кода по доказательствам.
+\item Основан на Гомотопической теории типов (HoTT) --- развитии интуиционистской теории типов Мартина-Лёфа.
+\item Полное изучение темы мы не сможем провести --- нужен более прочный математический фундамент.
+Разберём основные идеи, как введение.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Краткий перечень языковых конструкций}
+\begin{itemize}
+\item Синтаксис: отчасти вдохновлён ТеХ-ом.
+\item Реализует конструкции из $\lambda C$: зависимые типы, пи- и сигма-типы.
+\small\color[HTML]{025002}
+\begin{verbatim}
+\func fe : \Pi (P : Nat -> \Type) -> 
+          (\Pi (a : Nat) -> (P a)) -> \Sigma (x : Nat) (P x) =>
+   \lam P proof_forall => (0, proof_forall 0)
+\end{verbatim}
+\normalsize\color{black}
+<<если утверждение $P$ истинно при всех натуральных аргументах, то существует натуральный
+аргумент, при котором оно истинно>>
+\item Индуктивные типы (потомки W-типов из теории типов Мартина-Лёфа) --- обобщение алгебраических.
+\item Предикативная иерархия универсумов (базовые типы имеют уровень 0, тип уровня $k$ имеет уровень $k+1$).
+\item Гомотопическая теория типов --- формализуется с помощью унивалентной кубической теории типов.
+Равенство понимается как путь --- в отличии от системы индуктивных типов в теории типов Мартина-Лёфа.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Индуктивные типы}
+\begin{itemize}
+\item Алгебраические типы: параметры типа не влияют на выбор конструктора
+\small\color[HTML]{025002}
+\verb!type 'a list = Nil | Cons a ('a list)!
+\normalsize
+\color{black}
+
+\item Обобщённые алгебраические типы: допустимые конструкторы зависят от параметров типа
+\small\color[HTML]{025002}\begin{verbatim}
+type _ constant =
+  | Int : int -> int constant
+  | Float : float -> float constant
+
+Int 5 : int constant
+Float 3.141 : float constant
+\end{verbatim}\normalsize 
+\color{black}
+
+\item Обобщаем дальше (зависимые типы в параметрах, сложные конструкторы): $W$-типы, индуктивные типы в разных вариантах.
+\end{itemize}
+\end{frame}
+
+%\begin{frame}{W-типы}
+%$W$-типы Мартина-Лёфа, от слов well-founded.
+%\end{frame}
+
+\begin{frame}[fragile]{Индуктивные типы в Аренде}
+Простой случай --- похоже на алгебраические типы:
+\small\color[HTML]{025002}\begin{verbatim}
+\data Nat 
+   | zero
+   | suc Nat
+\end{verbatim}\normalsize
+\color{black}
+
+Случай сложнее:
+\small\color[HTML]{025002}\begin{verbatim}
+\data Fin (x : Nat) \elim x
+  | suc n => { fzero | fsuc (Fin n) }
+
+fzero : Fin 15         -- ок
+fsuc (fzero) : Fin 1   -- не типизируется
+\end{verbatim}
+\color{black}
+
+%\begin{verbatim}
+%\data Vec (A : \Type) (x : Nat) \elim x
+%  | 0 => fnil
+%  | suc n => fcons A (Vec A n)
+%\end{verbatim}
+
+Аренд интересен наличием высших индуктивных типов, простой пример:
+
+\small\color[HTML]{025002}\begin{verbatim}
+\data Int
+  | \coerce pos Nat
+  | neg Nat \with { zero => pos zero }
+\end{verbatim}\normalsize
+\color{black}
+
+\end{frame}
+
+\begin{frame}[fragile]{Элиминаторы для индуктивных типов}
+\begin{itemize}
+\item Знакомы с элиминаторами начиная с алгебраических типов:
+$$\infer{\Gamma \vdash \text{Case} \; L \; f \; g : \tau}{\Gamma \vdash L: \varphi \vee \psi, \;\;\;\; \Gamma \vdash f : \varphi \to \tau, \;\;\;\; \Gamma \vdash g: \psi \to \tau}$$
+
+\item Вспомним натуральные числа:
+
+\small\color[HTML]{025002}\begin{verbatim}
+\data Nat 
+   | zero
+   | suc Nat
+\end{verbatim}\normalsize
+\color{black}
+
+Построим зависимый элиминатор:
+
+\small\color[HTML]{025002}\begin{verbatim}
+\func Nat-elim (P : Nat -> \Type)
+               (z : P zero)
+               (s : \Pi (n : Nat) -> P n -> P (suc n))
+               (x : Nat) : P x \elim x
+  | zero => z
+  | suc n => s n (Nat-elim P z s n)
+\end{verbatim}\normalsize
+\color{black}
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Доказательство с помощью элиминаторов}
+\small\color[HTML]{025002}\begin{verbatim}
+\func plus-commutes-zero (x : Nat) : x Nat.+ 0 = 0 Nat.+ x \elim x
+  | 0 => idp                                    -- P 0
+  | suc x => pmap suc (plus-commutes-zero x)    -- P x -> P (suc x)
+
+-- Но то же можно сделать с помощью Nat-elim:
+
+\func Nat-elim (P : Nat -> \Type)
+               (z : P zero)
+               (s : \Pi (n : Nat) -> P n -> P (suc n))
+               (x : Nat) : P x \elim x
+  | zero => z
+  | suc n => s n (Nat-elim P z s n)
+
+\func plus-commutes-zero' (x : Nat) : x Nat.+ 0 = 0 Nat.+ x =>
+  Nat-elim (\lam x => x Nat.+ 0 = 0 Nat.+ x) 
+           (idp) 
+           (\lam x prev => pmap suc prev) x
+\end{verbatim}\normalsize
+\color{black}
+\end{frame}
+
+\begin{frame}{Равенство}
+%Что такое равенство? 
+
+\begin{itemize}
+\item Структурное равенство: побитовая одинаковость.
+Разрешимо, но малопригодно для жизни:
+
+$$\frac{2}{5} \ne \frac{4}{10}$$\vspace{0.5cm}
+
+\item Доказательное равенство: на основании аксиоматики. Неразрешимо.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Изоморфизм Карри-Ховарда-Воеводского}
+
+\begin{tabular}{lll}
+Логика & $\lambda$-исчисление & Топология\\\hline
+Высказывание & Тип & Пространство\\
+Доказательство & Терм & Точка в пространстве\\
+Предикат & Зависимый тип & Расслоение\\
+Равенство &\emph{Выделенный} зависимый тип & Пространство путей\\
+Доказательство равенства & Элемент равенства & Путь между точками
+\end{tabular}
+
+\begin{dfn}Будем считать два значения $a$ и $b$ в пространстве $X$ равными, если они связаны путём: непрерывной функцией $f:I\rightarrow X$,
+где $I = [0,1]$, такой, что $f(0)=a$, $f(1)=b$.\end{dfn}
+Из определения равенства по Лейбницу следует, что если некоторый предикат истинен для левой части непрерывного пути, то он истинен и для правой части.
+\end{frame}
+
+\begin{frame}{Равенство на примере натуральных чисел}
+\begin{dfn}$a,b \in \mathbb{N}_0$. Тогда $a\equiv b$, если существует непрерывная $f: I\rightarrow\mathbb{N}_0$, причём $f(0)=a$, $f(1)=b$\end{dfn}
+\begin{lmm}$a\equiv b$ тогда и только тогда, когда $a=b$.\end{lmm}
+\begin{proof}Пусть $a = b$. Положим $f(x) = a$. Тогда $f(0)=a=b=f(1)$.
+
+Пусть $a \ne b$. Предположим, есть путь $f$. Рассмотрим $A=f^{-1}(a)$ и $X=f^{-1}(\mathbb{N}_0\setminus\{a\})$. 
+По дискретности топологии $\{a\}$ и $\mathbb{N}_0\setminus\{a\}$ открыты. По непрерывности тогда $A$ и $X$ открыты.
+Также оба непусты (очевидно, $0 \in A$, $1 \in X$), $A \cap X = \varnothing$ и $A \cup X = I$. Значит, $I$ несвязно, что не так.
+Противоречие.
+\end{proof}
+\end{frame}
+
+\begin{frame}{Свойства равенства}
+\begin{thm}
+$a = a$.
+Если $a = b$, то $b = a$.
+Если $a = b$ и $b = c$, то $a = c$.
+\end{thm}
+\begin{proof}
+Положим $f(x) := a$.
+
+Положим $g(x) := f(1 - x)$. Тогда $f(0) = b$, $f(1) = a$, композиция непрерывных --- непрерывна.
+
+Пусть $f_1: a \leadsto b$ и $f_2: b \leadsto c$.
+Тогда $$g(x) := \left\{\begin{array}{ll}f_1(2\cdot x),& x < 0.5\\f_2(2\cdot x -1),& x\ge 0.5\end{array}\right.$$
+\end{proof}
+\end{frame}
+
+\begin{frame}[fragile]{Равенство в Аренде}
+Компьютер дискретен, потому мы имитируем топологическую конструкцию.
+\begin{itemize}
+\item Интервал $\texttt{I} := [\text{left}..\text{right}]$ --- есть доступ только к граничным точкам, внутренность недоступна.
+\item Путь --- индуктивный тип:
+\small\color[HTML]{025002}\begin{verbatim}
+\data Path (A : I -> \Type) (a : A left) (a' : A right)
+  | path (\Pi (i : I) -> A i)
+\end{verbatim}\normalsize
+\color{black}
+
+$\text{path f}:\text{Path}\ A\ a\ a'$  означает, что $f: a \leadsto a'$.
+Заметим, что компилятор дополнительно проверяет $f\ \text{left}\twoheadrightarrow_\beta a$ и $f\ \text{right}\twoheadrightarrow_\beta a'$ --- 
+неуказанная в определении встроенная семантика для \verb!path!.
+\item Равенство $a = a'$ (примем $a,a':A$) --- сокращение:
+\small\color[HTML]{025002}\begin{verbatim}
+\func \infix 1 = {A : \Type} (a a' : A) => Path (\lam _ => A) a a'
+\end{verbatim}\normalsize
+\color{black}
+
+%Кто обитает в $a = a'$?\\
+$\text{path }f : a = a'$ означает, что $\text{path }f:\text{Path}\ A\ a\ a'$, то есть найдётся $f : a \leadsto a'$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Как работать с \texttt{I}}
+
+\small\color[HTML]{025002}\begin{verbatim}
+\func \infix 1 = {A : \Type} (a a' : A) => Path (\lam _ => A) a a'
+\end{verbatim}\normalsize
+\color{black}
+
+Докажем что-нибудь про равенство.
+\begin{itemize}
+\item Рефлексивность: 
+\small\color[HTML]{025002}\verb!\func eq-reflexive {A : \Type} {a : A} : a = a => path (\lam _ => a)!\normalsize\color{black}
+
+\item Для транзитивности нужна середина интервала. Для этого воспользуемся 
+элиминатором для \verb!I!, также системное определение:
+\small\color[HTML]{025002}\begin{verbatim}
+\func coe (P : I -> \Type)
+          (a : P left)
+          (i : I) : P i \elim i
+  | left => a
+\end{verbatim}\normalsize
+\color{black}
+
+<<Если некоторый предикат $P$, индексированный интервалом, выполнен на левом крае интервала, то он выполнен в любой точке интервала>>
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Транзитивность равенства}
+
+
+\small\color[HTML]{025002}\begin{verbatim}
+\func eq-transitive {A : \Type} {a a' a'' : A}
+                    (f : a = a')
+                    (g : a' = a'') : a = a'' =>
+  coe (\lam p => a = g @ p) f right
+\end{verbatim}\normalsize
+\color{black}
+
+%\vspace{-0.15cm}
+%{\color{gray}\verb!\func coe (P : I -> \Type) (a : P left) (i : I) : P i \elim i!}
+%\vspace{0.15cm}
+
+
+%Итак: $a' = g @ left$, $a'' = g @ right$, $a_p = g @ p, p \in \texttt{I}$.
+
+Проиллюстрируем картинкой:\vspace{-0.2cm}
+\begin{center}\tikz{
+   \node (A) at (0,3) { $a$ };
+   \node (A1) at (3,3) { $a'$ };
+   \node (A2) at (3,0) { $a''$ };
+   \node[color=gray] (P) at (3,1.5) {};
+
+   \node[right] at ($(A1) + (0.5,0)$) {\small\color{gray} $g@left$ };
+   \node[right] at ($(P) + (0.5,0)$) {\small\color{gray} $g@p$ };
+   \node[right] at ($(A2) + (0.5,0)$) {\small\color{gray} $g@right$ };
+
+   \draw[-stealth] (A) -- node[above]{$f: a = a'$} (A1);
+   \draw[-stealth] (A1) -- (A2);
+   \draw[-stealth] (A) -- node[pos=0.6,below,sloped]{$a = a''$}(A2);
+   \draw[-stealth,color=gray] (A) -- (P);
+}\end{center}\vspace{-0.3cm}
+Здесь $p \in \texttt{I}$, и $g @ p$ --- некоторая точка по пути $g$ из $a'$ в $a''$.
+
+\end{frame}
+
+\begin{frame}[fragile]{Симметричность}
+Осталось третье свойство: $a = a' \rightarrow a' = a$.
+
+\small\color[HTML]{025002}\begin{verbatim}
+\func eq-symmetric {A : \Type} {a a' : A} (p : a = a') : a' = a \elim p
+  | idp => idp
+\end{verbatim}\normalsize
+\color{black}
+
+Сопоставление с образцом для равенства возможно --- 
+его обитатель есть \verb!idp!, специальный конструктор. Также встроенное в язык поведение.
+
+%В гомотопической теории типов эта конструкция выражается через так называемый J-элиминатор:
+
+\end{frame}
+
+\begin{frame}[fragile]{Стандартные функции работы с равенством}
+\begin{itemize}
+\item Если $a = a'$ и $B(a)$ истинен, то $B(a')$ истинен.
+
+\small\color[HTML]{025002}\begin{verbatim}\func transport {A : \Type} (B : A -> \Type) {a a' : A} 
+              (p : a = a') (b : B a) : B a'
+     => coe (\lam i => B (p @ i)) b right\end{verbatim}
+\normalsize\color{black}
+
+По сути тот же \verb!coe!, но индексирует предикат вдоль пути вместо интервала:
+
+\small\color[HTML]{025002}\begin{verbatim}\func eq-transitive {A : \Type} {a a' a'' : A}
+                    (f : a = a')
+                    (g : a' = a'') : a = a'' =>
+  transport (\lam x => a = x) f right
+\end{verbatim}\normalsize
+\color{black}
+
+\item Если $a = a'$, то $f(a) = f(a')$:
+
+\small\color[HTML]{025002}\begin{verbatim}
+\func pmap {A B : \Type} (f : A -> B) {a a' : A} (p : a = a') : f a = f a' 
+     => path (\lam i => f (p @ i))
+\end{verbatim}\normalsize
+\color{black}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Функциональная экстенциональность}
+Всюду совпадающие функции равны.
+
+\small\color[HTML]{025002}\begin{verbatim}\func funExt {A : \Type} (B : A -> \Type) {f g : \Pi (a : A) -> B a}
+    (p : \Pi (a : A) -> f a = g a) : f = g
+    => path (\lam i => \lam a => p a @ i)\end{verbatim}
+\normalsize
+\color{black}
+\end{frame}
+
+\begin{frame}[fragile]{Доказать неравенство}
+\begin{itemize}
+\item Ложь --- это \verb!Empty! (тип без значений).
+\small\color[HTML]{025002}
+\begin{verbatim}
+\data Empty
+\end{verbatim}\normalsize
+\color{black}
+\item $0 \ne 1$ --- это $0 = 1 \rightarrow \bot$.
+\item Построим функцию \verb!T : Nat -> \Type!, которая для 0 возвращает обитаемый тип, а для других чисел --- необитаемый.
+\small\color[HTML]{025002}\begin{verbatim}
+\func T (x : Nat) : \Type \elim x
+| Z => \Sigma
+| _ => Empty
+\end{verbatim}\normalsize
+\color{black}
+\item $T$ --- это предикат, раз можем поставить вопрос, истинен (обитаем) ли $T\ 0$. Поэтому он сохраняет истинность для равных объектов
+(принцип Лейбница).
+\item Заметим, что \verb!T 0! истинен (обитаем), так как \verb!() : \Sigma!. Значит, мы найдём значение и для \verb!T 1! (для \verb!Empty!), при условии, что $0 = 1$.
+\small\color[HTML]{025002}\begin{verbatim}
+zero-ne-1 (p : 0 = 1) : Empty => transport T p ()
+\end{verbatim}\normalsize
+\color{black}
+\end{itemize}
+\end{frame}
+
+\end{document}

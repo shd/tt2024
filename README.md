@@ -80,3 +80,10 @@ https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.67.5276
 Journal of Functional Programming 1 (2): 125-154, April 1991
 + Documentation for the Idris language
 http://docs.idris-lang.org/en/latest/
+
+## Лекция 6
+### Язык Аренд. Изоморфизм Карри-Ховарда-Воеводского. Гомотопическая теория типов
++ Общие сведения о языке Аренд.
++ Общие сведения об индуктивных типах.
++ Изоморфизм Карри-Ховарда-Воеводского
++ Равенство в языке Аренд
