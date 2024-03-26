@@ -1,0 +1,221 @@
+{- Автор: Эрвин Мавлютов -}
+
+\import Data.Maybe
+\import Equiv
+\import Function.Meta
+\import Logic
+\import Meta
+\import Paths.Meta
+\import tt.Utils
+
+{-
+терм лямбда-исчисления
+V -- тип термов, свободные переменные которых лежат в V
+-}
+
+\data Term (V : \Set)
+  | var V
+  | app (Term V) (Term V)
+  | lam (Term (Maybe V))
+
+-- $1
+\func ex1 : Term Nat => var 1
+
+-- $1 $2
+\func ex2 : Term Nat => app (var 1) (var 2)
+
+-- \x. ($1 x) $2
+\func ex3 : Term Nat => lam (app (app (var (just 1)) (var nothing)) (var (just 2)))
+
+-- Omega = (\x. x x) (\x. x x)
+\func Omega : Term Nat => app (lam (app (var nothing) (var nothing))) (lam (app (var nothing) (var nothing)))
+
+-- \x y. x $1
+{-
+x <-> just nothing
+y <-> nothing
+z in FV(True) <-> (just (just z))
+var-type :: Maybe (Maybe V)
+           |__y   |__x  |__free_variables
+-}
+\func ex4 : Term Nat => lam (lam (app (var (just nothing)) (var (just (just 1)))))
+
+-- переименование свободных переменных
+\func termMap {A B : \Set} (f : A -> B) (t : Term A) : Term B \elim t
+  | var v => var (f v)
+  | app t1 t2 => app (termMap f t1) (termMap f t2)
+  | lam t => lam (termMap (fmap f) t)
+
+\func liftM {A B : \Set} (k : A -> Term B) (m : Maybe A) : Term (Maybe B) =>
+  maybe (var nothing) (\lam a => termMap just (k a)) m
+
+-- заменить все свободные переменные x на выражения (k x)
+\func \infixl 2 >>= {A B : \Set} (t : Term A) (k : A -> Term B) : Term B \elim t
+  | var v => k v
+  | app t1 t2 => app (t1 >>= k) (t2 >>= k)
+  | lam f => lam (f >>= liftM k)
+
+-- (\x. f) t -> f[x := t]
+\func applyTerm {V : \Set} (f : Term (Maybe V)) (t : Term V) : Term V
+  => f >>= maybe t var
+
+\module Reduction \where {
+  -- 1 шаг бета-редукции
+  \data Beta-red1 {V : \Set} (t s : Term V) \elim t, s
+    -- s == f[x := a] => (\x. f) a ~> s
+    | app t a, s => beta {f : Term (Maybe V)} (t = lam f) (s = applyTerm f a)
+    | app t1 t2, app s1 s2 => {
+    -- T1 ~> S1 => (T1 P) ~> (S1 P)
+      | red-left (Beta-red1 t1 s1) (t2 = s2)
+    -- T2 ~> S2 => (P T2) ~> (P S2)
+      | red-right (t1 = s1) (Beta-red1 t2 s2)
+    }
+    -- T ~> S => (\x. T) ~> (\x. S)
+    | lam t, lam s => red-lam (Beta-red1 t s)
+
+  -- рефлексивно-транзитивное замыкание бета-редукции
+  \data Beta-red {V : \Set} (t s : Term V)
+    -- рефлексивность
+    | red-eq (t = s)
+    -- транзитивное замыкание
+    | red-step {z : Term V} (Beta-red1 t z) (Beta-red z s)
+
+  -- 1 шаг параллельной бета-редукции
+  \data Parallel-beta-red1 {V : \Set} (t s : Term V) \elim t, s
+    | t, s => pb:eq (t = s)
+    | app t a, s => pb:apply {f : Term (Maybe V)} (t = lam f) (s = applyTerm f a)
+    | app t1 t2, app s1 s2 => pb:app (Parallel-beta-red1 t1 s2) (Parallel-beta-red1 t2 s2)
+    | lam f1, lam f2 => pb:lam (Parallel-beta-red1 f1 f2)
+
+  -- параллельная редукция
+  \data Parallel-beta-red {V : \Set} (t s : Term V)
+    | pb:red-step {z : Term V} (Parallel-beta-red1 t z) (Parallel-beta-red z s)
+
+  -- достижимость: терм называется достижимым, если все термы, в которые редуцируется данный, достижимы
+  -- интуитивно это можно понимать так: терм достижим, если не существует бесконечных цепочек редукции
+  \data Acc {V : \Set} (a : Term V)
+    | acc (\Pi {a' : Term V} -> Beta-red1 a a' -> Acc a')
+
+  -- стратегия редукции: возвращает либо во что можно средуцировать терм за 1 шаг,
+  --                                либо доказательство, что это сделать нельзя
+  \func strategy {V : \Set} (t : Term V) : Decide (\Sigma (s : Term V) (Beta-red1 t s)) \elim t
+    | var v => no \lam (s, red1) => \case red1
+    | app t1 t2 => \case strategy t1 \with {
+      | yes (s, t1~>s) => yes (app s t2, red-left t1~>s idp)
+      | no _l => \case strategy t2 \with {
+        | yes (s, t2~>s) => yes (app t1 s, red-right idp t2~>s)
+        | no _r => cases (t1 arg addPath) \with {
+          | lam f, equ => yes (f >>= maybe t2 var, beta idp idp)
+          | var v, equ => no \lam (s, red1) => cases (s, red1) \with {
+            | x, beta p p1 => \case p
+            | app x x1, red-left x2 p => _l (x, rewrite equ x2)
+            | app x x1, red-right p x2 => _r (x1, x2)
+          }
+          | app t1 t3, equ => no \lam (s, red1) => cases (s, red1) \with {
+            | x, beta p p1 => \case p
+            | app x x1, red-left x2 p => _l (x, rewrite equ x2)
+            | app x x1, red-right p x2 => _r (x1, x2)
+          }
+        }
+      }
+    }
+    | lam t => \case strategy t \with {
+      | yes (s, red1) => yes (lam s, red-lam red1)
+      | no _x => no \lam (s, red1) => cases (s, red1) \with {
+        | lam f, red-lam red1' => _x (f, red1')
+      }
+    }
+
+  -- вычисляет достижимые термы в нормальную форму
+  -- возвращает терм в нормальной форме и доказательство нормальности
+  \func evalToNF {V : \Set} (t : Term V) (a : Acc t)
+                 (str : \Pi (s : Term V) -> Decide (\Sigma (q : Term V) (Beta-red1 s q)))
+    : \Sigma (s : Term V) (\Pi (q : Term V) -> Not (Beta-red1 s q)) \elim a
+    | acc f => \case str t \with {
+      | yes (q,t~>q) => evalToNF q (f t~>q) str
+      | no r => (t, \lam q x => r (q,x))
+    }
+}
+
+\module Typing \where {
+  -- импликационный фрагмент ИИВ
+  \data Type
+    | Unit
+    | Arr Type Type
+
+  -- типизация по Карри
+  \data hasType {V : \Set} (ctx : V -> Type) (t : Term V) (T : Type) \elim t, T
+    | var v, T => var-type (ctx v = T)
+    | app t1 t2, B => app-type {A : Type} (hasType ctx t1 (Arr A B)) (hasType ctx t2 A)
+    | lam t, Arr A B => lam-type (hasType (maybe A ctx) t B)
+}
+
+\module SubstLems \where {
+  \open Typing
+
+  -- Г, x : A |- b : B       Г |- a : A
+  -- ----------------------------------
+  --           Г |- b[a/x] : B
+
+  -- зависимая версия
+  \func substLem {U V : \Set} (ctx : U -> Type) (b : Term U) (B : Type) (h : hasType ctx b B)
+                 (ctx' : V -> Type) (a : U -> Term V) (h' : \Pi (u : U) -> hasType ctx' (a u) (ctx u))
+    : hasType ctx' (b >>= a) B \elim b, B, h
+    | var v, B, var-type ctx_v=B => rewriteI ctx_v=B (h' v)
+    | app f x, B, app-type {A} :t-f :t-x => app-type (substLem ctx f (Arr A B) :t-f ctx' a h') (substLem ctx x A :t-x ctx' a h')
+    | lam f, Arr A B, lam-type h => lam-type $ substLem (maybe A ctx) f B h (maybe A ctx') (liftM a) (unfold liftM $ \case \elim __ \with {
+      | nothing => var-type idp
+      | just uu => cases (ctx uu, a uu, h' uu) \with {
+        | _, var v, var-type p => var-type p
+        | _, app f x, app-type :t-f :t-x => app-type (lem:subst-termMap just f :t-f) (lem:subst-termMap just x :t-x)
+        | Arr _ _, lam f, lam-type :t-f => lam-type (lem:subst-termMap (fmap just) f (rewrite lem:maybe-fmap :t-f))
+      }
+    })
+    \where {
+      \func lem:subst-termMap {U V : \Set} {ctx : V -> Type} (f : U -> V) (t : Term U) {A : Type} (:t-t : hasType (\lam u => ctx (f u)) t A)
+        : hasType ctx (termMap f t) A \elim t, A, :t-t
+        | var v, A, var-type p => var-type p
+        | app t1 t2, A, app-type :t-t1 :t-t2 => app-type (lem:subst-termMap f t1 :t-t1) (lem:subst-termMap f t2 :t-t2)
+        | lam g, Arr A B, lam-type :t-g => lam-type (lem:subst-termMap (fmap f) g (rewrite lem:maybe-comp :t-g))
+
+      \func lem:maybe-comp {A B C : \Set} {z : B} {f : C -> A} {g : A -> B} : (\lam u => maybe z g (fmap f u)) = maybe z (\lam u => g (f u)) =>
+        ext \case \elim __ \with {
+          | nothing => idp
+          | just _ => idp
+        }
+
+      \func lem:maybe-fmap {A B : \Set} {z z' : B} {f : A -> B} : (\lam u => maybe z (maybe z' f) (fmap just u)) = maybe z f =>
+        ext \case \elim __ \with {
+          | nothing => idp
+          | just _ => idp
+        }
+    }
+
+  \func substLem1 {V : \Set} (ctx : V -> Type) {A B : Type} {x : Term V} (:t-x : hasType ctx x A)
+                  {f : Term (Maybe V)} (:t-f : hasType (maybe A ctx) f B) : hasType ctx (f >>= maybe x var) B =>
+    substLem (maybe A ctx) f B :t-f ctx (maybe x var) $ \case \elim __ \with {
+      | nothing => :t-x
+      | just a => var-type idp
+    }
+}
+
+-- лемма о редукции (subject reduction)
+\func lem:subject-reduction {V : \Set} {ctx : V -> Type} {a a' : Term V} (r : Beta-red a a') {A : Type} (h : hasType ctx a A)
+  : hasType ctx a' A \elim r
+  | red-eq p => rewriteI p h
+  -- индукция по количеству шагов редукции
+  | red-step a~>z z~~>a' => lem:subject-reduction z~~>a' (lem:subjred1 a~>z h)
+  \where {
+    \open Reduction
+    \open Typing
+    \open SubstLems
+
+    \func lem:subjred1 {V : \Set} {ctx : V -> Type} {a a' : Term V} (r : Beta-red1 a a') {A : Type} (h : hasType ctx a A)
+      : hasType ctx a' A \elim a, a', r, A, h
+      | app f x, res, beta {f'} f=lam_f' res=f[x], B, app-type {A} :t-f :t-x => rewrite res=f[x] (cases (rewrite f=lam_f' :t-f) \with {
+        | lam-type :t-f' => substLem1 ctx :t-x :t-f'
+      })
+      | app t1 t2, app s1 s2, red-left t1~>s1 t2=s2, A, app-type :t-t1 :t-t2 => app-type (lem:subjred1 t1~>s1 :t-t1) (rewriteI t2=s2 :t-t2)
+      | app t1 t2, app s1 s2, red-right t1=s1 t2~>s2, A, app-type :t-t1 :t-t2 => app-type (rewriteI t1=s1 :t-t1) (lem:subjred1 t2~>s2 :t-t2)
+      | lam f, lam f', red-lam f~>f', Arr A B, lam-type :t-f => lam-type (lem:subjred1 f~>f' :t-f)
+  }

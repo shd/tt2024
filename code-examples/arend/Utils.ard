@@ -1,0 +1,32 @@
+{- Автор: Эрвин Мавлютов -}
+
+\import Data.Maybe
+\import Logic
+\import Logic.Meta
+
+\class Functor (F : \Set -> \Set)
+  | fmap {A B : \Set} : (A -> B) -> (F A -> F B)
+  | fmap-id {A : \Set} (x : F A) : fmap (\lam a => a) x = x
+  | fmap-comp {A B C : \Set} (f : A -> B) (g : B -> C) (x : F A) : fmap (\lam a => g (f a)) x = fmap g (fmap f x)
+
+\instance FunctorMonad : Functor Maybe
+  | fmap {A B : \Set} (f : A -> B) (mb : Maybe A) : Maybe B \elim mb {
+    | nothing => nothing
+    | just a => just (f a)
+  }
+  | fmap-id => \case \elim __ \with {
+    | nothing => idp
+    | just a => idp
+  }
+  | fmap-comp => \lam f g => \case \elim __ \with {
+    | nothing => idp
+    | just a => idp
+  }
+
+\func maybe {A B : \Type} (b : B) (j : A -> B) (m : Maybe A) : B \elim m
+  | nothing => b
+  | just a => j a
+
+\data Decide (A : \Type)
+  | yes A
+  | no (A -> Empty)
