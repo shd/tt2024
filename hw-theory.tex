@@ -407,8 +407,8 @@ struct NonZero { const static std::enable_if_t<x != T(0), T> value = x; };
 \item $\star\rightarrow\star\rightarrow\star$; $\ \star\rightarrow\textbf{unsigned}$
 \item $\textbf{int}\rightarrow(\star\rightarrow\star)$
 \item $(\star\rightarrow\textbf{int})\rightarrow\star$
-\item $\Pi x^\star.n^\textbf{int}.F(n,x)$, где $$F(n,x) = \left\{\begin{array}{ll}\textbf{int}, & n = 0\\
-                                   x\rightarrow F(n,x), & n > 0\end{array}\right.$$
+\item $\Pi x^\star.\lambda n^\textbf{int}.F(n,x)$, где $$F(n,x) = \left\{\begin{array}{ll}\textbf{int}, & n = 0\\
+                                   x\rightarrow F(n-1,x), & n > 0\end{array}\right.$$
 \end{enumerate}
 
 \item Определите функции из следующих частей $\lambda$-куба (в обобщённой типовой системе) и докажите их тип:
