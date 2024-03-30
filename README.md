@@ -87,3 +87,27 @@ http://docs.idris-lang.org/en/latest/
 + Общие сведения об индуктивных типах.
 + Изоморфизм Карри-Ховарда-Воеводского
 + Равенство в языке Аренд
+### Где почитать
++ Документация по языку Аренд.
+https://arend-lang.github.io/documentation/
++ <<HoTT book>> Homotopy Type Theory: Univalent Foundations of Mathematics.  The Univalent Foundations Program
+Institute for Advanced Study. 
+https://homotopytypetheory.org/book/
++ Хатчер А, Алгебраическая топология. Издательство МЦНМО, Москва, 2011
+
+## Лекция 7
+### Иерархии универсумов в Аренде
++ Prop и Set в Coq
++ Обобщение: гомотопическая иерархия в Аренде
++ Пропозициональное усечение
++ Сорта в языках с зависимыми типами, мотивация для сортов выше звёздочки
++ Парадокс Жирара (формулировка)
++ Предикативная иерархия
+### Где почитать
++ Документация по языку Coq
+https://coq.inria.fr/doc/V8.13.0/refman/addendum/extraction.html
++ Документация по языку Аренд
+https://arend-lang.github.io/documentation/
++ A.J.C. Hurkens, A Simplification of Girard's Paradox. 
+In: Dezani-Ciancaglini, M., Plotkin, G. (eds) Typed Lambda Calculi and Applications. 
+TLCA 1995. Lecture Notes in Computer Science, vol 902. Springer, Berlin, Heidelberg. 
