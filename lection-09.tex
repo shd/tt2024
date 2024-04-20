@@ -1,0 +1,128 @@
+\documentclass[aspectratio=169,dvipsnames,usenames]{beamer}
+\usepackage{graphicx}
+\usepackage{stmaryrd}
+\usepackage[T1,T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{verbatim}
+\usepackage{amsthm}
+%\usepackage{bnf}
+\usepackage{tikz}
+\usepackage{enumerate}
+\usepackage{mathtext}
+\usepackage{mathtools}
+\usepackage{mathabx}
+%\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
+\usepackage{proof}
+%\usepackage{paracol}
+%\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{colortbl}
+%\usepackage{minted}
+%\usepackage{hyperref}
+\setbeamertemplate{navigation symbols}{}
+\usetikzlibrary{graphs}
+\usetikzlibrary{graphs.standard}
+\usetikzlibrary{automata,positioning}
+\usepackage{float}
+
+\begin{document}
+
+%\theoremstyle{dfn}
+\newtheorem{dfn}{Определение}[section]
+\newtheorem{nte}{Замечание}[section]
+
+\newtheorem{axiom}{Аксиома}[section]
+\newtheorem{thm}{Теорема}[section]
+\newtheorem{lmm}[theorem]{Лемма}
+\newtheorem{statement}{Утверждение}[section]
+\newtheorem{oun_paragraph}{Пункт}[section]
+\newtheorem{cons}{Следствие}[section]
+\newtheorem*{exm}{Пример}
+
+\newcommand{\comb}[1]{\operatorname{\mathcal{#1}}}
+\newcommand{\func}[1]{\operatorname{#1}}
+\newcommand{\reduction}[1]{{\color{OrangeRed}#1}}
+\newcommand{\set}[1]{\left\{#1\right\}}
+
+\def\from#1{\par \parbox{0.7\textwidth}{\par \hfill\raggedleft \it #1}} 
+
+\begin{frame}{}
+\begin{center}
+{\LARGE Множества, Сетоиды, Теорема Диаконеску}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Set --- не множество}
+\begin{verbatim}
+Theorem choice :
+ forall (A B : Type) (R : A->B->Prop),
+   (forall x : A, exists y : B, R x y) ->
+    exists f : A->B, (forall x : A, R x (f x)).
+\end{verbatim}
+\end{frame}
+
+\begin{frame}{Сетоид}
+\begin{dfn}Сетоид --- множество с отношением эквивалентности\end{dfn}
+\end{frame}
+
+\begin{frame}[fragile]{}
+\small
+\begin{verbatim}
+Reflx: {A : Type} -> (R: A -> A -> Type) -> Type
+Reflx {A} R = (x : A) -> R x x
+
+Symm: {A : Type} -> (R: A -> A -> Type) -> Type
+Symm {A} R = (x : A) -> (y : A) -> R x y -> R y x
+
+Trans: {A : Type} -> (R: A -> A -> Type) -> Type
+Trans {A} R = (x : A) -> (y : A) -> (z : A) -> R x y -> R y z -> R x z
+
+data IsEquivalence: {A : Type} -> (R: A -> A -> Type) -> Type where
+    EqProof: {A: Type} -> (R: A -> A -> Type) -> 
+       Reflx {A} R -> Symm {A} R -> Trans {A} R -> IsEquivalence {A} R
+
+record Setoid where
+    constructor MkSetoid
+    Carrier: Type
+    Equiv: Carrier -> Carrier -> Type
+    EquivProof: IsEquivalence Equiv
+\end{verbatim}
+\end{frame}
+
+\begin{frame}[fragile]{}
+\footnotesize
+\begin{verbatim}
+data Map: (A:Setoid) -> (B:Setoid) -> Type where
+  MkMap: {A:Setoid} -> {B:Setoid} -> (f: (Carrier A) -> (Carrier B)) -> 
+     ({x:Carrier A} -> {y:Carrier A} -> 
+     ((Equiv A) x y) -> ((Equiv B) (f x) (f y))) -> Map A B
+
+MapF: {A:Setoid} -> {B:Setoid} -> Map A B -> (Carrier A -> Carrier B)
+MapF (MkMap {A} {B} f ext) = f
+
+MapExt: {A:Setoid} -> {B:Setoid} -> (p: Map A B) -> 
+     ({x:Carrier A} -> {y:Carrier A} -> ((Equiv A) x y) -> ((Equiv B) (MapF p x) (MapF p y)))
+MapExt (MkMap {A} {B} f ext) = ext
+
+Rel: Type -> Type -> Type
+Rel a b = a -> b -> Type
+
+postulate ext_ac: {I: Setoid} -> {S: Setoid} -> 
+  (A: Rel (Carrier I) (Carrier S)) -> 
+  ((x: Carrier I) -> (g : Carrier S ** A x g)) ->
+  (chs: (Map I S) ** ((w: Carrier I) -> A w ((MapF chs) w)))
+
+excluded_middle: (P: Type) -> Or P (Not P)
+\end{verbatim}
+\end{frame}
+
+\begin{frame}{Аксиома выбора в HoTT}
+$$ $$
+\end{frame}
+
+\end{document}

@@ -126,3 +126,15 @@ https://arend-lang.github.io/documentation/
 + <<HoTT book>> Homotopy Type Theory: Univalent Foundations of Mathematics.  The Univalent Foundations Program
 Institute for Advanced Study. 
 https://homotopytypetheory.org/book/
+
+## Лекция 9
+### Аксиома выбора, сетоиды, теорема Диаконеску
++ Set не множество, доказуемость аксиомы выбора для Set-ов.
++ Сетоиды, теорема Диаконеску
++ Аксиома выбора в HoTT
++ Доказательство теоремы Диаконеску на Аренде
+### Где почитать
++ Стандартная библиотека языка Аренд
++ <<HoTT book>> Homotopy Type Theory: Univalent Foundations of Mathematics.  The Univalent Foundations Program
+Institute for Advanced Study. 
+https://homotopytypetheory.org/book/
