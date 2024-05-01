@@ -807,4 +807,66 @@ $|B|=\beta$.
 библиотеки \verb!Relation/Equivalence.ard!, тип данных \verb!Quotient!) в факторизованное имеет частичную обратную, то выполнена аксиома выбора.
 \end{enumerate}
 
+\section*{Домашнее задание №9: парадокс Жирара}
+\begin{enumerate}
+\item Напомним, что для ординала $\alpha$ за $\sigma\alpha$ мы обозначили множество меньших ординалов,
+а за $\tau X$ --- порядковый тип упорядоченного множества $\langle X,< \rangle$. 
+Покажите, что для любого ординала $\alpha$ выполнено $\tau\sigma\alpha = \alpha$.
+Верно ли, что $\alpha=\sigma\alpha$?
+\item Пусть $f: S \rightarrow T$. Определим $f_\star : \wp S \rightarrow \wp T$ поэлементно: $f_\star(X) = \{ f(x)\ |\ x \in X \}$.
+\begin{enumerate}
+\item Покажите, что универсум $\mathcal{U}$ парадоксален тогда и только тогда, когда $\langle \wp\mathcal{U}, \sigma_\star, \tau_\star\rangle$ 
+парадоксален. 
+\item Рассмотрим $\mathcal{U} = \{\langle A, \prec, a \rangle\ |\ (\prec) \subseteq A^2, a \in A\}$.
+Пусть $\sigma\langle A, \prec, a \rangle = \{\langle A, \prec, b\rangle\ |\ b \prec a\}$. Тогда $\sigma : \mathcal{U} \rightarrow \wp\mathcal{U}$.
+
+Тогда мы можем ввести отношение на $\mathcal{U}$. Будем считать $Y < X$, если $Y \in \sigma_\star X$.
+
+Определим $\tau X := \langle \wp \mathcal{U}, (<), X\rangle$.
+
+Покажите, что $\langle \mathcal{U}, \sigma, \tau\rangle$ --- парадоксальный универсум.
+\end{enumerate}
+\item Покажите, что $\Omega\in\mathcal{U}$.
+\item Покажите невозможность фундированности $\Omega$. А именно, обоснуйте переходы и восполните пробелы в следующих рассуждениях:
+\begin{enumerate}
+\item Лемма. Множество $\{y | \neg\tau\sigma y < y \}$ индуктивно:
+\begin{itemize}
+\item Рассмотрим $x$, что для всех $y < x$ выполнено $\neg \tau\sigma y < y$.
+\item Предположим, что $\tau\sigma x < x$. 
+\item Тогда $\neg \tau\sigma\tau\sigma x < \tau\sigma x$.
+\item Но $\tau\sigma\tau\sigma x = \tau\sigma u$ для некоторого $u < x$.
+\end{itemize}
+\item Основная теорема: $\Omega$ не фундировано.
+\begin{itemize}
+\item Предположим, что $\Omega$ фундировано.
+\item $\tau\sigma\Omega$ имеет вид $\tau\sigma\omega$ для некоторого фундированного $\omega$.
+\item $\tau\sigma\Omega$ есть предшественник $\Omega$.
+\item Однако, $\neg \tau\sigma \Omega < \Omega$, поскольку $\Omega$ фундировано и $\{y | \neg\tau\sigma y < y \}$ индуктивно.
+\end{itemize}
+\end{enumerate}
+\item Вспомним определение с лекции:
+\begin{itemize}
+\item $\mathcal{U} = \Pi X : \Box . ((\wp X \rightarrow X) \rightarrow \wp X)$
+\item $\tau = \lambda X : \wp\mathcal{U}. \lambda A : \Box.\lambda c : (\wp A \rightarrow A).\lambda a : A.\varphi$, где
+ $\varphi = \Pi P^{\wp \mathcal{U}}.\Pi x^\mathcal{U}.(X\ x\rightarrow (P (c ((x\ A)\ c)))) \rightarrow P\ a$
+
+\item $\sigma = \lambda x : \mathcal{U} . ((x\ \mathcal{U})\ \tau)$
+\end{itemize}
+
+\begin{enumerate}
+\item Найдите типы $\tau$ и $\sigma$.
+\item Покажите, что универсум $(\mathcal{U},\sigma,\tau)$ парадоксален, показав бета-эквивалентность:
+для всех $X: \wp \mathcal{U}$ выполнено $\sigma\tau X =_\beta \bigcap \{ P \subseteq \mathcal{U}\ |\ \forall x \in X.\tau\sigma x \in P \}$.
+В лямбда-исчислении нет примитива для аксиомы выделения, поэтому записать прямо формулу вида
+$T = \{ \tau\sigma x\ |\ x \in X\}$ не получится --- но тот же результат можно получить, построив пересечение всех подмножеств $\mathcal{U}$, содержащих $T$
+(или, говоря ближе к языку лямбда-исчисления, построив конъюнкцию всех предикатов $P$ со свойством $X\ x\rightarrow P(\tau\sigma x)$).
+\end{enumerate}
+\end{enumerate}
+
+\section*{Дополнительные задания на баллы}
+\begin{enumerate}
+\item (15 баллов) Перенесите доказательство парадокса Жирара с языка Coq на Аренд:
+\url{https://coq.inria.fr/doc/master/stdlib/Coq.Logic.Hurkens.html}
+\end{enumerate}
+
 \end{document}

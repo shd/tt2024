@@ -1,0 +1,292 @@
+\documentclass[aspectratio=169,dvipsnames,usenames]{beamer}
+\usepackage{graphicx}
+\usepackage{stmaryrd}
+\usepackage[T1,T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{verbatim}
+\usepackage{amsthm}
+%\usepackage{bnf}
+\usepackage{tikz}
+\usepackage{enumerate}
+\usepackage{mathtext}
+\usepackage{mathtools}
+\usepackage{mathabx}
+%\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
+\usepackage{proof}
+%\usepackage{paracol}
+%\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{colortbl}
+%\usepackage{minted}
+%\usepackage{hyperref}
+\setbeamertemplate{navigation symbols}{}
+\usetikzlibrary{graphs}
+\usetikzlibrary{graphs.standard}
+\usetikzlibrary{automata,positioning}
+\usepackage{float}
+
+\begin{document}
+
+%\theoremstyle{dfn}
+\newtheorem{dfn}{Определение}[section]
+\newtheorem{nte}{Замечание}[section]
+
+\newtheorem{axiom}{Аксиома}[section]
+\newtheorem{thm}{Теорема}[section]
+\newtheorem{lmm}[theorem]{Лемма}
+\newtheorem{statement}{Утверждение}[section]
+\newtheorem{oun_paragraph}{Пункт}[section]
+\newtheorem{cons}{Следствие}[section]
+\newtheorem*{exm}{Пример}
+
+\newcommand{\comb}[1]{\operatorname{\mathcal{#1}}}
+\newcommand{\func}[1]{\operatorname{#1}}
+\newcommand{\reduction}[1]{{\color{OrangeRed}#1}}
+\newcommand{\set}[1]{\left\{#1\right\}}
+
+\def\from#1{\par \parbox{0.7\textwidth}{\par \hfill\raggedleft \it #1}} 
+
+\begin{frame}{}
+\begin{center}
+{\LARGE Парадокс Жирара}
+\end{center}
+\end{frame}
+
+\begin{frame}{Расширение обобщённых типовых систем}
+
+Расширение обобщённых типовых систем, 5 уровней:
+
+\vspace{1cm}
+\begin{tabular}{lll}
+№ & название & обозначение, примеры\\\hline
+0 & термы: доказательства & x, $\lambda p.q$, ...\\
+1 & типы: утверждения & $1=1$ \\
+2 & рода: семейства утверждений & $\star$ \\
+3 & сорт <<квадратик>> & $\Box$ (единственный представитель) \\
+4 & сорт <<треугольник>> & $\triangle$ (единственный представитель)
+\end{tabular}
+
+\end{frame}
+\begin{frame}{Обобщённые типовые системы, системы $U$ и $U^-$}
+
+\begin{tabular}{lll}
+Название & Аксиомы & Правила\\\hline
+$\lambda HOL$ & $\star : \Box$, $\Box : \triangle$ & $(\star,\star)$, $(\Box,\Box)$, $(\Box,\star)$ \\
+             & $\star : \Box$, $\Box : \triangle$ & $(\star,\star)$, $(\Box,\Box)$, $(\Box,\star)$, $(\triangle,\star)$ \\\hline
+$\lambda U^-$ & $\star : \Box$, $\Box : \triangle$ & $(\star,\star)$, $(\Box,\Box)$, $(\Box,\star)$, $(\triangle,\Box)$ \\
+$\lambda U$ & $\star : \Box$, $\Box : \triangle$ & $(\star,\star)$, $(\Box,\Box)$, $(\Box,\star)$, $(\triangle,\Box)$, $(\triangle,\star)$ 
+\end{tabular}
+
+\end{frame}
+
+\begin{frame}{Парадокс Бурали-Форте}
+
+\begin{thm}Множества всех ординалов не существует\end{thm}
+\begin{proof} %(схематичное изложение)
+Пусть $\Omega$ --- множество всех ординалов. 
+\begin{enumerate}
+\item Легко заметить, что $\Omega$ является ординалом:
+\begin{itemize}
+\item Все ординалы сравнимы (если есть аксиома выбора) --- линейный порядок
+\item Если множество ординалов $X \subseteq \Omega$ непусто $(x \in X)$, то в $\min X = \min (x' \cap X)$.
+Поскольку $x'$ --- ординал, то в любом его непустом подмножестве есть минимум --- полный порядок.
+\item Если $y \in x$ и $x \in \Omega$, то $y$ ординал --- транзитивность.
+\end{itemize}
+\item Однако, любой ординал $\alpha \in \Omega$, то есть $\Omega < \Omega$
+\item Однако, это есть противоречие с определением строгого порядка.
+\end{enumerate}
+\end{proof}
+\end{frame}
+
+\begin{frame}{Порядковые типы}
+
+\begin{definition}Множества $(A,\prec)$ и $(B,\sqsubset)$ имеют одинаковый \emph{порядковый тип}, если существует биекция между ними, сохраняющая порядок:
+$$\forall a\in A.\forall b \in A.a \prec b \leftrightarrow f(a) \sqsubset f(b)$$
+\end{definition}
+
+\begin{definition}Операции перехода от множества к порядковому типу и назад:
+\begin{enumerate}
+\item $\sigma$ --- по порядковому типу (по соответствующему ординалу) получить вполне упорядоченное множество: $\sigma\alpha = \{ t: \text{ординал} | t < \alpha \}$
+\item $\tau$ --- по вполне упорядоченному множеству получить его порядковый тип: $\tau X$
+\end{enumerate}
+
+Заметим, что (здесь $X$ --- некоторое множество ординалов):
+ $$\sigma\tau X = \{ \beta : \text{ординал} | \beta < \tau X\} = \{ \tau\sigma\alpha | \alpha \in X \}$$
+\end{definition}
+
+\end{frame}
+\begin{frame}{Парадоксальные универсумы}
+
+Напомним, что $X \rightarrow Y := \Pi x^X.Y$.
+
+\begin{definition}\emph{Булеан} множества $S$ (power set) --- множество всех предикатов на $S$:
+$$\wp: S \rightarrow \star$$
+\end{definition}
+
+
+Рассмотрим $\sigma: \mathcal{U}\rightarrow\wp\mathcal{U}$ и $\tau: \wp\mathcal{U}\rightarrow\mathcal{U}$
+
+\begin{definition}
+$\mathcal{U}$ парадоксален, если для всех $X \in \wp\mathcal{U}$ выполнено $$\sigma\tau X = \{\tau\sigma x | x \in X \}$$
+\end{definition}
+
+%\vspace{3cm}
+
+\end{frame}
+\begin{frame}{Предшественники}
+
+Фиксируем парадоксальный универсум $\mathcal{U}$ вместе с отображениями $\sigma$ и $\tau$.
+
+\begin{definition}
+Назовём $y$ \emph{предшественником} $x$ ($y < x$), если $y \in \sigma x$.
+\end{definition}
+
+\begin{lemma}[о выражении предшественника]
+Если $t < \tau\sigma x$, то $t = \tau\sigma y$ для некоторого $y < x$
+\end{lemma}
+\begin{proof}
+Пусть $X = \sigma x = \{ y | y < x \}$; это множество всех предшественников $x$.
+
+$t < \tau\sigma x$, то есть $t \in \sigma\tau\sigma x$, то есть $t \in \sigma\tau X$, то есть (по парадоксальности) $t \in \{\tau\sigma y | y \in X \}$,
+то есть $t = \tau\sigma y$ для некоторого $y \in X$, то есть $t = \tau\sigma y$ при $y < X$.
+%$\sigma\tau X = \sigma\{ \tau\sigma y | y < x \} = \sigma X$
+%По определению предшествования, $t = \sigma\tau\sigma x$,
+%Тогда $\sigma\tau X = \{\tau\sigma y | y < x \}$ (по парадоксальности),
+%поэтому $t$ 
+\end{proof}
+\begin{lemma}
+Если $p < q$, то $\tau\sigma p < \tau\sigma q$
+\end{lemma}
+
+\end{frame}
+
+\begin{frame}{Индуктивность и фундированность}
+
+\begin{definition} Рассмотрим универсум $\mathcal{U}$. Индуктивность множеств и фундированность:
+
+\begin{enumerate}
+\item $X \subseteq \mathcal{U}$ --- \emph{индуктивное}, если всякий $x$, предшественники которого содержатся в $X$, сам содержится в $X$:
+$$\text{Если для всех }y < x\text{ выполнено }y \in X\text{, то }x \in X$$
+
+\item $x \in \mathcal{U}$ --- \emph{фундированный}, если $x$ принадлежит всем индуктивным множествам.
+\end{enumerate}
+\end{definition}
+\end{frame}
+
+\begin{frame}{Множество $\Omega$}
+\begin{definition} Фиксируем некоторый универсум $\langle\mathcal{U},\sigma,\tau\rangle$. Тогда $\Omega = \tau\{x | x \text{ фундирован}, x\in\mathcal{U}\}$ --- 
+порядковый тип множества всех фундированных множеств.
+\end{definition}
+
+Легко заметить, что $\Omega\in\mathcal{U}$.
+
+\begin{lmm}Если $X$ индуктивно, то и $T = \{y | \tau\sigma y \in X\}$ также индуктивно.\end{lmm}
+\begin{proof}
+Для индуктивности $T$ нужно показать, что если $y < x$ влечёт $y \in T$, то $x \in T$.
+Фиксируем $x$, что $\tau\sigma y \in X$ для всех $y < x$.
+Тогда заметим, что если $k < \tau\sigma x$, то найдётся такой $y$, что $k = \tau\sigma y$ и $y < x$
+(лемма о выражении предшественника), то есть $k \in X$. Значит (индуктивность $X$), $\tau\sigma x \in X$, то есть $x \in T$.
+\end{proof}
+
+
+\end{frame}
+
+\begin{frame}{$\Omega$ фундировано}
+\begin{lmm} В парадоксальном универсуме $(\sigma\tau X = \{\tau\sigma x| x \in X\})$ множество $\Omega$ фундировано.
+\end{lmm}
+%Фундированность $\Omega$ означает, что любое индуктивное множество его содержит. 
+\begin{proof}
+\begin{itemize}
+\item Фиксируем индуктивное $X \subseteq \mathcal{U}$. Чтобы показать $\Omega \in X$, по определению индуктивности надо показать, что если $t < \Omega$, то $t \in X$.
+Пусть $F$ --- множество всех фундированных элементов, $F \subseteq \mathcal{U}$.
+
+\item Пусть $t < \Omega$, тогда $t \in \sigma\Omega$ (определение предшествования), 
+отсюда $\sigma\Omega = \sigma\tau F$
+(определение $\Omega$).
+
+\item По парадоксальности, $\sigma\tau F \subseteq \{\tau\sigma x| x \in F\}$, то есть $t \in \sigma\Omega \subseteq \{\tau\sigma x | x \in F\}$,
+то есть $t = \tau\sigma\omega$ при некотором $\omega \in F$.
+
+\item Поскольку $X$ индуктивно, то по лемме и множество $T = \{y | \tau\sigma y \in X\}$ индуктивно. По определению, ему принадлежат все фундированные элементы: $F \subseteq T$.
+Значит, $\omega \in F$ влечёт $\omega \in T$, то есть $t = \tau\sigma\omega \in X$.
+
+\end{itemize}
+\end{proof}
+\end{frame}
+
+\begin{frame}{Множество $\Omega$ противоречиво}
+\begin{lmm} $\Omega$ не может быть фундировано. \end{lmm}
+\begin{proof} Можно показать, используя обратное включение: $\{\tau\sigma x| x \in X\} \subseteq \sigma\tau X$.\end{proof}
+
+\begin{thm}Множество $\Omega$ не существует\end{thm}
+\begin{proof}$\Omega$ фундировано, но его фундированность ведёт к противоречию.\end{proof}
+\end{frame}
+
+\begin{frame}{Построение парадокса в $U^-$}
+
+Теперь, имея идею парадокса, покажем, что в $U^-$ есть парадоксальные универсумы.
+
+Вспомним изоморфизм Карри-Ховарда: $P(x) \approx x \in \{ t\ |\ P(t)\} \approx X : P(x)$
+
+После этого выразим операции $\sigma$, $\tau$ и построим $\Omega$.
+
+\begin{enumerate}
+\item $\mathcal{U} = \Pi X : \Box . ((\wp X \rightarrow X) \rightarrow \wp X)$
+\item $\tau = \lambda X : \wp\mathcal{U}. \lambda A : \Box.\lambda c : (\wp A \rightarrow A).\lambda a : A.\varphi$,\\
+где
+ $\varphi = \Pi P^{\wp \mathcal{U}}.\Pi x^\mathcal{U}.(X\ x\Rightarrow (P (c (\{x\ A\}\ c)))) \Rightarrow P\ a$
+
+\item $\sigma = \lambda x : \mathcal{U} . ((x\ \mathcal{U})\ \tau)$
+\end{enumerate}
+
+Заметим, что для задания $\mathcal{U}$ нам требуются правила $(\triangle,\openbox)$.
+
+Несложно показать, что $(\mathcal{U},\sigma,\tau)$ --- парадоксальный:
+%\begin{center}
+%$\mathcal{U}$ парадоксален, если для всех $X : \mathcal{U}$ выполнено $\sigma\tau X = \{\tau\sigma x | x \in X \}$
+%\end{center}
+$\mathcal{U}$ парадоксален, если для всех $X \in \wp\mathcal{U}$ выполнено $$\sigma\tau X = \{\tau\sigma x | x \in X \}$$
+Например потому, что для всех $X: \wp \mathcal{U}$ выполнено $\sigma\tau X =_\beta \bigcap \{ P \subseteq \mathcal{U}\ |\ \forall x \in X.\tau\sigma x \in P \}$
+
+А далее строим $\Omega$ и выписываем применение двух утверждений:
+$\Omega$ фундирован и $\Omega$ фундирован $\rightarrow \bot$.
+\end{frame}
+
+\begin{frame}{Упрощённая формула}
+
+Рассмотрим $\sigma: \mathcal{U} \rightarrow \wp\wp\mathcal{U}$ и $\tau: \wp\wp\mathcal{U}\rightarrow\mathcal{U}$.
+Назовём $\mathcal{U}$ мощным универсумом, если при $C \in \wp\wp\mathcal{U}$ выполнено
+$$\sigma\tau C = \{ X\ |\ \{y | \tau\sigma y \in X \} \in C\}$$
+
+Дадим следующие обозначения:
+\begin{enumerate}
+\item Универсум: $$\mathcal{U} = \Pi x^\Box.(\wp\wp x \rightarrow x) \rightarrow \wp\wp x$$
+
+\item Отображения:
+       $$\tau t = \lambda X^\Box.\lambda f ^{\wp\wp X \rightarrow X}.\lambda p^{\wp X}.t \lambda x^\mathcal{U}.p (f\ (x\ X)\ f)$$
+       $$\sigma s = (s\ \mathcal{U})\ \lambda t ^ {\wp\wp\mathcal{U}}.\tau t$$
+
+\item Вспомогательное:
+       $$\Delta = \lambda y ^ \mathcal{U}. (\Pi p ^ {\wp\mathcal{U}}.\sigma y p \rightarrow p \tau \sigma y) \rightarrow \bot$$
+
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Омега и парадокс}
+В качестве $\Omega$ берём $\tau \{ X | X \text{ индуктивен}\}$:
+$$\Omega = \tau\ \lambda p ^ {\wp\mathcal{U}} . \Pi x ^ \mathcal{U} . \sigma x p \rightarrow p x$$
+
+Тогда следующее выражение обитает в типе <<ложь>> ($\bot = \Pi p^\star.p$):
+$$\begin{array}{c}\lambda a_0 : \Pi p : \wp \mathcal{U} . (\Pi x : \mathcal{U} . (\sigma x p) \rightarrow (p x)) \rightarrow (p \Omega)).\\
+  ((a_0\ \Delta)\ \lambda x ^ {\mathcal{U}}.\lambda a_2 ^ {(\sigma x \Delta)}.\lambda a_3^ {\Pi p : \wp\mathcal{U}.(\sigma x p)\rightarrow p \tau \sigma x}.\\
+  ((a_3\ \Delta)\ a_2)\ \lambda p^{\wp\mathcal{U}.(a_3\ \lambda y : \mathcal{U}.p \tau\sigma y)} (\lambda p^{\wp\mathcal{U}}.a_0\ \lambda y: \mathcal{U}.(p \tau\sigma y)))\\
+  \lambda p^{\wp\mathcal{U}}.\lambda a_1 ^ {\Pi x:\mathcal{U}.\sigma x p \rightarrow p x}.(a_1\ \Omega)\ \lambda x^\mathcal{U}.a_1\ \tau\sigma x\end{array}
+$$
+\end{frame}
+
+\end{document}

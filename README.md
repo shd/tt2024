@@ -123,7 +123,7 @@ TLCA 1995. Lecture Notes in Computer Science, vol 902. Springer, Berlin, Heidelb
 + Документация по языку Аренд
 https://arend-lang.github.io/documentation/
 + Хатчер А, Алгебраическая топология. Издательство МЦНМО, Москва, 2011
-+ <<HoTT book>> Homotopy Type Theory: Univalent Foundations of Mathematics.  The Univalent Foundations Program
++ <<HoTT book>> Homotopy Type Theory: Univalent Foundations of Mathematics. The Univalent Foundations Program
 Institute for Advanced Study. 
 https://homotopytypetheory.org/book/
 
@@ -135,6 +135,17 @@ https://homotopytypetheory.org/book/
 + Доказательство теоремы Диаконеску на Аренде
 ### Где почитать
 + Стандартная библиотека языка Аренд
-+ <<HoTT book>> Homotopy Type Theory: Univalent Foundations of Mathematics.  The Univalent Foundations Program
++ <<HoTT book>> Homotopy Type Theory: Univalent Foundations of Mathematics. The Univalent Foundations Program
 Institute for Advanced Study. 
 https://homotopytypetheory.org/book/
+
+## Лекция 10
+### Парадокс Жирара
++ Парадокс Бурали-Форти
++ Адаптация и упрощение парадокса: парадоксальные универсумы
++ Конструкции из U и U^-, позволяющие выразить упрощённый парадокс
++ Первая версия доказательства лжи в U^-
++ Мощные универсумы, дальнейшее упрощение парадокса
++ Вторая версия доказательтсва лжи
+### Где почитать
++ Antonius Hurkens, A Simplification of Girard's Paradox.
