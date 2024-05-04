@@ -1,0 +1,282 @@
+\documentclass[aspectratio=169,dvipsnames,usenames]{beamer}
+\usepackage{graphicx}
+\usepackage{stmaryrd}
+\usepackage[T1,T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{verbatim}
+\usepackage{amsthm}
+%\usepackage{bnf}
+\usepackage{tikz}
+\usepackage{enumerate}
+\usepackage{mathtext}
+\usepackage{mathtools}
+\usepackage{mathabx}
+%\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
+\usepackage{proof}
+%\usepackage{paracol}
+%\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{colortbl}
+%\usepackage{minted}
+%\usepackage{hyperref}
+\setbeamertemplate{navigation symbols}{}
+\usetikzlibrary{graphs}
+\usetikzlibrary{graphs.standard}
+\usetikzlibrary{automata,positioning}
+\usepackage{float}
+
+\begin{document}
+
+%\theoremstyle{dfn}
+\newtheorem{dfn}{Определение}[section]
+\newtheorem{nte}{Замечание}[section]
+
+\newtheorem{axiom}{Аксиома}[section]
+\newtheorem{thm}{Теорема}[section]
+\newtheorem{lmm}[theorem]{Лемма}
+\newtheorem{statement}{Утверждение}[section]
+\newtheorem{oun_paragraph}{Пункт}[section]
+\newtheorem{cons}{Следствие}[section]
+\newtheorem*{exm}{Пример}
+
+\newcommand{\comb}[1]{\operatorname{\mathcal{#1}}}
+\newcommand{\func}[1]{\operatorname{#1}}
+\newcommand{\reduction}[1]{{\color{OrangeRed}#1}}
+\newcommand{\set}[1]{\left\{#1\right\}}
+
+\def\from#1{\par \parbox{0.7\textwidth}{\par \hfill\raggedleft \it #1}} 
+
+\begin{frame}{}
+\begin{center}
+{\LARGE Линейные и уникальные типы}
+\end{center}
+\end{frame}
+
+\begin{frame}{Контекст требует формализации}
+
+Напомним правила вывода:
+	$$\infer{\Gamma, \theta \vdash \theta}{}
+		\quad\infer{\Gamma \vdash \varphi \rightarrow \psi}{\Gamma, \varphi \vdash \psi}\quad
+		\infer{\Gamma \vdash \psi}{\Gamma \vdash \varphi \to \psi && \Gamma \vdash \varphi}$$
+	
+
+Что такое контекст?
+\begin{enumerate}
+\item Это множество? Ведь $\alpha, \alpha\rightarrow\beta = \alpha\rightarrow\beta,\alpha$
+
+	$$\infer{\alpha\rightarrow\beta, \alpha \vdash \beta}
+                {\infer{\alpha, \alpha\rightarrow\beta \vdash \alpha\rightarrow\beta}{}\quad\quad\infer{ \alpha\rightarrow\beta,\alpha \vdash  \alpha}{}}$$
+\item Разве это множество? Ведь $\alpha,\alpha \ne \alpha$.
+
+	$$\infer{\vdash\alpha\rightarrow\alpha\rightarrow\alpha}{\infer{\alpha\vdash\alpha\rightarrow\alpha}{\infer{\alpha,\alpha\vdash\alpha}{}}}$$
+\end{enumerate}
+
+%Требуется формализация.
+\end{frame}
+
+\begin{frame}{Структурные правила}
+Перестановка:
+$$\infer{\Xi,\Sigma,\Delta,H\vdash\varphi}{\Xi,\Delta,\Sigma,H\vdash\varphi}$$
+Сжатие:
+$$\infer{\Xi,\delta\vdash\varphi}{\Xi,\delta,\delta\vdash\varphi}$$
+Ослабление:
+$$\infer{\Xi,\delta\vdash\varphi}{\Xi\vdash\varphi}$$
+
+Сжатие и ослабление предполагают содержательные действия.
+
+$$\infer{y:\beta\vdash\lambda x^\alpha.y : \alpha\rightarrow\beta}{\infer{y:\beta,x:\alpha\vdash y : \beta}{y:\beta\vdash y : \beta}}\quad\quad
+  \infer{x:\alpha\vdash ( x,x ) : \alpha\times\alpha}{\infer{x:\alpha,x:\alpha\vdash ( x,x ) : \alpha \times \alpha}{x:\alpha\vdash x:\alpha\quad\quad x:\alpha\vdash x:\alpha}}$$
+\end{frame}
+
+\begin{frame}{Два варианта удаления конъюнкции}
+Вариант 1 (классический):
+$$\infer{\Gamma\vdash\alpha}{\Gamma\vdash\alpha\times\beta}\quad\infer{\Gamma\vdash\beta}{\Gamma\vdash\alpha\times\beta}$$
+
+Вариант 2 (альтернативный):
+$$\infer{\Gamma,\Delta\vdash\varphi}{\Gamma\vdash\alpha\times\beta\quad\Delta,\alpha,\beta\vdash\varphi}$$
+
+Варианты эквивалентны, но только при наличии структурных правил:
+$$\infer{\Gamma\vdash \alpha \times \beta}{\infer{\Gamma,\Gamma\vdash\alpha \times \beta}{\Gamma\vdash\alpha\quad\Gamma\vdash\beta}}
+\quad\quad\quad
+\infer{\Gamma\vdash\alpha}{\Gamma\vdash\alpha\times\beta\quad\infer{\alpha,\beta\vdash\alpha}{\infer{\alpha\vdash\alpha}{}}}
+$$
+\end{frame}
+
+\begin{frame}{Изоморфизм Карри-Ховарда}
+\begin{itemize}
+\item Сжатие --- копирование значения
+\item Ослабление --- удаление значения
+\item Классическая конъюнкция:
+$$\infer{\Gamma\vdash \text{fst}(P):\alpha}{\Gamma\vdash P:\alpha\times\beta}\quad\infer{\Gamma\vdash \text{snd}(P):\beta}{\Gamma\vdash P:\alpha\times\beta}$$
+
+\item Альтернативная конъюнкция:
+$$\infer{\Gamma,\Delta\vdash \text{case } P \text{ of }(x,y) \rightarrow E : \varphi}{\Gamma\vdash P:\alpha\times\beta\quad\Delta, x: \alpha, y: \beta\vdash E:\varphi}$$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Линейная логика (вариант Филиппа Вадлера)}
+Грамматика:
+$$\varphi ::= X\ |\ \varphi\multimap\varphi\ |\ \varphi\otimes\varphi\ |\ \varphi\ \&\ \varphi\ |\ \varphi\oplus\varphi\ |\ \varphi\bindnasrepma\varphi\ |\ !\varphi$$
+
+Два типа контекстов:
+$\langle \alpha \rangle$ --- линейный,
+$[\beta]$ --- интуиционистский
+
+Структурные правила:
+
+$$\infer{\Xi,\Delta,\Gamma,H\vdash\alpha}{\Xi,\Gamma,\Delta,H\vdash\alpha}\quad\quad
+  \infer{\Gamma,[\alpha]\vdash\beta}{\Gamma,[\alpha],[\alpha]\vdash\beta}\quad\quad
+  \infer{\Gamma,[\alpha]\vdash\beta}{\Gamma\vdash\beta}$$
+
+Аксиомы:
+
+$$\infer{[\alpha]\vdash\alpha}{}\quad\quad\infer{\langle\alpha\rangle\vdash\alpha}{}$$
+
+
+\end{frame}
+
+\begin{frame}{Правила для связок}
+Правила для <<конечно>> (возможно тиражировать построение $\alpha$):
+
+$$\infer{[\Gamma]\vdash !\alpha}{[\Gamma]\vdash\alpha}\quad\quad\infer{\Gamma,\Delta\vdash\beta}{\Gamma\vdash!\alpha\quad\quad\Delta,[\alpha]\vdash\beta}$$
+
+Линейная импликация:
+$$\infer{\Gamma\vdash\alpha\multimap\beta}{\Gamma,\langle\alpha\rangle\vdash\beta}\quad\quad\infer{\Gamma,\Delta\vdash\beta}{\Gamma\vdash\alpha\multimap\beta\quad\quad\Delta\vdash\alpha}$$
+\end{frame}
+
+\begin{frame}{Правила для связок: конъюнкция и дизъюнкция}
+Мультипликативная конъюнкция (возможно построить и $\alpha$ и $\beta$ одновременно):
+$$\infer{\Gamma,\Delta\vdash\alpha\otimes\beta}{\Gamma\vdash\alpha\quad\quad\Delta\vdash\beta}\quad\quad\infer{\Gamma,\Delta\vdash\varphi}{\Gamma\vdash\alpha\otimes\beta\quad\quad\Delta,\langle\alpha\rangle,\langle\beta\rangle\vdash\varphi}$$
+
+Аддитивная конъюнкция (возможно построить $\alpha$ и возможно построить $\beta$, что-то одно по нашему выбору):
+$$\infer{\Gamma\vdash\alpha\&\beta}{\Gamma\vdash\alpha\quad\quad\Gamma\vdash\beta}\quad\quad\infer{\Gamma\vdash\alpha}{\Gamma\vdash\alpha\&\beta}\quad\quad\infer{\Gamma\vdash\beta}{\Gamma\vdash\alpha\&\beta}$$
+
+Аддитивная дизъюнкция (возможно построить $\alpha$ или возможно построить $\beta$, что-то одно по их выбору):
+$$\infer{\Gamma\vdash\alpha\oplus\beta}{\Gamma\vdash\alpha}\quad\quad\infer{\Gamma\vdash\alpha\oplus\beta}{\Gamma\vdash\beta}\quad\quad
+  \infer{\Gamma,\Delta\vdash\varphi}{\Gamma\vdash\alpha\oplus\beta\quad\quad\Delta,\langle\alpha\rangle\vdash\varphi\quad\quad\Delta,\langle\beta\rangle\vdash\varphi}$$
+
+\end{frame}
+
+\begin{frame}{Пример: интуиционистская импликация}
+Введём обозначение: $$\alpha\rightarrow\beta := !\alpha\multimap\beta$$
+
+Заметим, что такая импликация ведёт себя как интуиционистская:
+$$\infer{\Gamma\vdash !\alpha\multimap\beta}{\infer{\Gamma,\langle!\alpha\rangle\vdash\beta}{\langle!\infer{\alpha\rangle\vdash!\alpha}{}\quad\quad\Gamma,[\alpha]\vdash\beta}}$$
+
+$$\infer{\Gamma,[\Delta]\vdash\beta}{\Gamma\vdash!\alpha\multimap\beta\quad\quad\infer{[\Delta]\vdash!\alpha}{[\Delta]\vdash\alpha}}$$
+\end{frame}
+
+\begin{frame}{Вложение остальных интуиционистских связок в линейные}
+Например, можно так:
+\begin{center}\begin{tabular}{l}
+$\alpha\rightarrow\beta := !\alpha\multimap\beta$\\
+$\alpha\times\beta := \alpha\&\beta$\\
+$\alpha+\beta := !\alpha\oplus!\beta$
+\end{tabular}\end{center}
+
+\end{frame}
+
+\begin{frame}{Комбинаторный базис BCKW}
+
+\begin{itemize}
+\item $B := \lambda x.\lambda y.\lambda z.x\ (y\ z)$ (комбинатор $Z$, Zusammensetzung)
+\item $C := \lambda x.\lambda y.\lambda z.x\ z\ y$ (комбинатор $T$, verTauschnung)
+\item $K := \lambda x.\lambda y.x$ (Konstanz)
+\item $W := \lambda x.\lambda y.x\ y\ y$
+\end{itemize}
+$BC$ --- линейная логика (значение нельзя ни удалить, ни скопировать)
+
+$BCK$ --- аффинная логика (значение можно удалить, но не скопировать)
+
+$BCKW$ --- интуиционистская логика
+\vspace{1cm}
+
+Почему? Например, $W:(\alpha\rightarrow\alpha\rightarrow\beta)\rightarrow(\alpha\rightarrow\beta)$.
+
+\end{frame}
+
+\begin{frame}{}
+\begin{center}
+{\LARGE Реализация\\Уникальные типы}
+\end{center}
+\end{frame}
+
+\begin{frame}{Язык}
+Роды:
+$$\kappa ::= \mathcal{T}\ |\ \mathcal{U}\ |\ \star\ |\ \kappa\rightarrow\kappa$$
+
+Типы:
+\begin{center}\begin{tabular}{ll}
+$\texttt{Int}$ & $: \mathcal{T}$\\
+$\rightarrow$ & $: \star\rightarrow\star\rightarrow\mathcal{T}$\\
+$\circ,\times$ & $: \mathcal{U}$\\
+$\vee,\wedge$ & $: \mathcal{U}\rightarrow\mathcal{U}\rightarrow\mathcal{U}$\\
+$\neg$ & $: \mathcal{U}\rightarrow\mathcal{U}$\\
+$\texttt{Attr}$ & $: \mathcal{T}\rightarrow\mathcal{U}\rightarrow\star$
+\end{tabular}\end{center}
+
+Обозначения:
+\begin{center}\begin{tabular}{l}
+$t^u := \texttt{Attr}\ t\ u$\\
+$a \rightarrow^u b := \texttt{Attr}\ (a\rightarrow b)\ u$
+\end{tabular}\end{center}
+
+Значения:
+$$E ::= x^\odot\ |\ x^\otimes\ |\ \lambda x.E\ |\ E\ E$$
+\end{frame}
+
+\begin{frame}{Типизация}
+Правила типизации имеют такой вид:
+$$\Gamma\vdash E:\tau|_{fv}$$
+
+Здесь $\Gamma$ сопоставляет переменным типы рода $\star$.
+$fv$ сопоставляет переменным типы рода $\mathcal{U}$.
+
+Правила вывода:
+$$\infer{\Gamma,x:t^u\vdash x^\odot:t^u|_{x:u}}{}\quad\quad\infer{\Gamma,x:t^\times\vdash x^\otimes:t^\times|_{x:\times}}{}$$
+$$\infer[fv' := fv\setminus\{x:\tau\}]{\Gamma\vdash\lambda x.E:a \rightarrow^{\bigvee fv'} b|_{fv'}}{\Gamma,x:a\vdash E:b|_{fv}}\quad\quad
+  \infer{\Gamma\vdash E_1\ E_2:b|_{fv_1\cup fv_2}}{\Gamma\vdash E_1:a\rightarrow^u b|_{fv_1}\quad\quad\Gamma\vdash E_2:a|_{fv2}}$$
+\end{frame}
+
+\begin{frame}[fragile]{Смысл булевский выражений}
+Будем считать уникальность истиной, а неуникальность --- ложью.
+И рассмотрим, например, функцию \verb!fst!:
+
+$$\texttt{fst} : (t^u, s^v)^{w\vee u} \rightarrow t^u$$
+
+Это то же самое, что и
+
+$$\texttt{fst} : (t^u, s^v)^w \rightarrow t^u, w \le u$$
+
+Однако, подобные выражения могут быть разрешены с помощью \emph{булевской унификации}.
+\end{frame}
+
+\begin{frame}[fragile]{Где применяются линейные/уникальные типы}
+Ручное распределение памяти:
+\begin{verbatim}
+void compute() {
+    char* x = new char[1024];
+    char* y = x;
+    y[10] = 'a';
+    delete [] x;      // delete y; нельзя! будут ошибки.
+}
+\end{verbatim}
+
+Автоматическое распределение памяти (сборка мусора, подсчёт ссылок):
+\begin{verbatim}
+public void compute() {          fn compute() {
+    int[] x = new int[1024];         let x = Arc::new("abcde");
+    int[] y = x;                     let y = x.clone();
+    x[10] = 15;                  }
+}
+\end{verbatim}
+
+А давайте посчитаем количество ссылок при компиляции. Линейный тип всегда существует в единственном экземпляре.
+\end{frame}
+
+\end{document}

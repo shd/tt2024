@@ -149,3 +149,13 @@ https://homotopytypetheory.org/book/
 + Вторая версия доказательтсва лжи
 ### Где почитать
 + Antonius Hurkens, A Simplification of Girard's Paradox.
+
+## Лекция 11
+### Линейные и уникальные типы
++ Линейная логика (вариант Филиппа Вадлера)
++ Комбинаторный базис BCKW и линейные типы
++ Уникальные типы (вариант Эдско де Вриеса и др.)
++ Применение идеи в языках программирования
+### Где почитать
++ Philip Wadler. A taste of linear logic
++ Edsko de Vries, Rinus Plasmeijer, David M Abrahamson. Uniqueness Typing Simplified
