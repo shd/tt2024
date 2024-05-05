@@ -820,7 +820,7 @@ $|B|=\beta$.
 \item Рассмотрим $\mathcal{U} = \{\langle A, \prec, a \rangle\ |\ (\prec) \subseteq A^2, a \in A\}$.
 Пусть $\sigma\langle A, \prec, a \rangle = \{\langle A, \prec, b\rangle\ |\ b \prec a\}$. Тогда $\sigma : \mathcal{U} \rightarrow \wp\mathcal{U}$.
 
-Тогда мы можем ввести отношение на $\mathcal{U}$. Будем считать $Y < X$, если $Y \in \sigma_\star X$.
+Тогда мы можем ввести отношение на $\wp\mathcal{U}$. Будем считать $Y < X$, если $Y \in \sigma_\star X$.
 
 Определим $\tau X := \langle \wp \mathcal{U}, (<), X\rangle$.
 
@@ -848,7 +848,7 @@ $|B|=\beta$.
 \begin{itemize}
 \item $\mathcal{U} = \Pi X : \Box . ((\wp X \rightarrow X) \rightarrow \wp X)$
 \item $\tau = \lambda X : \wp\mathcal{U}. \lambda A : \Box.\lambda c : (\wp A \rightarrow A).\lambda a : A.\varphi$, где
- $\varphi = \Pi P^{\wp \mathcal{U}}.\Pi x^\mathcal{U}.(X\ x\rightarrow (P (c ((x\ A)\ c)))) \rightarrow P\ a$
+ $\varphi = \Pi P^{\wp A}.\Pi x^\mathcal{U}.(X\ x\rightarrow (P (c ((x\ A)\ c)))) \rightarrow P\ a$
 
 \item $\sigma = \lambda x : \mathcal{U} . ((x\ \mathcal{U})\ \tau)$
 \end{itemize}
@@ -861,6 +861,34 @@ $|B|=\beta$.
 $T = \{ \tau\sigma x\ |\ x \in X\}$ не получится --- но тот же результат можно получить, построив пересечение всех подмножеств $\mathcal{U}$, содержащих $T$
 (или, говоря ближе к языку лямбда-исчисления, построив конъюнкцию всех предикатов $P$ со свойством $X\ x\rightarrow P(\tau\sigma x)$).
 \end{enumerate}
+\end{enumerate}
+
+\section*{Домашнее задание №10: линейная логика, уникальные типы}
+\begin{enumerate}
+\item Как известно, интуиционистские связки могут быть выражены в линейном исчислении.
+Покажите соответствующие интуиционистские аксиомы для следующих способов выразить интуиционистские связки
+через линейные:
+\begin{enumerate}
+\item Интуиционистская дизъюнкция: $A + B :=\ !A \oplus !B$
+\item Интуиционистская конъюнкция: $A \times B := A \with B$
+\item Альтернативная конъюнкция: $A \times B :=\ !A \otimes !B$ 
+\item Покажите, что альтернативная конъюнкция влечёт обычную, но не наоборот: $\langle!A \otimes !B\rangle \vdash A \with B$,
+но $\langle A \with B\rangle \not\vdash \ !A \otimes !B$.
+\end{enumerate}
+
+\item Покажите следующие линейные тождества:
+\begin{enumerate}
+\item $\vdash \phi \multimap \phi$
+\item $\vdash \ !\phi \multimap \ !!\phi$
+\item $!(\alpha\&\beta) \equiv !\alpha\otimes!\beta$ (надо построить два доказательства, $\varphi\vdash\psi$ и $\psi\vdash\varphi$)
+\end{enumerate}
+
+\item Дистрибутивность
+\begin{enumerate}
+\item Выполняется ли дистрибутивность для $(\&)$ и $(\oplus)$?
+\item Выполняется ли дистрибутивность для $(\&)$ и $(\otimes)$?
+\end{enumerate}
+
 \end{enumerate}
 
 \section*{Дополнительные задания на баллы}
