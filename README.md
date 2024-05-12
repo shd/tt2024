@@ -159,3 +159,19 @@ https://homotopytypetheory.org/book/
 ### Где почитать
 + Philip Wadler. A taste of linear logic
 + Edsko de Vries, Rinus Plasmeijer, David M Abrahamson. Uniqueness Typing Simplified
+
+## Лекция 12
+### Подтипы, типизация объектно-ориентированного программирования
++ Повторение общих понятий (подтипы, вариантность типа, именная и структурная эквивалентности)
++ Система F<:
++ Формализация подтипизации на структурах, формализация ООП
++ Пример формализации: язык Окамль
++ Полиморфные вариантные типы, модули, объекты в Окамле
++ Общие идеи о формализации типовой системы
+## Где почитать
++ Бенджамен Пирс. Типы в языках программирования, Добросвет, 2012
++ Luca Cardelli, Simone Martini, John C. Mitchell, Andre Scedrov, An extension of system F with subtyping. 
+International Conference on Theoretical Aspects of Computer Software, T.Ito, A.R.Meyer Eds., Lecture
+Notes in Computer Science n. 526, pp 750-770, Springer Verlag, 1991
++ Clément Blaudeau. OCaml modules: formalization, insights and improvements.
++ Didier Remy and Jerome Vouillon. Objective ML: An effective object-oriented extension to ML.

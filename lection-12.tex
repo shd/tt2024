@@ -1,0 +1,325 @@
+\documentclass[aspectratio=169,dvipsnames,usenames]{beamer}
+\usepackage{graphicx}
+\usepackage{stmaryrd}
+\usepackage[T1,T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{verbatim}
+\usepackage{amsthm}
+%\usepackage{bnf}
+\usepackage{tikz}
+\usepackage{enumerate}
+\usepackage{mathtext}
+\usepackage{mathtools}
+\usepackage{mathabx}
+%\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
+\usepackage{proof}
+%\usepackage{paracol}
+%\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{colortbl}
+%\usepackage{minted}
+%\usepackage{hyperref}
+\setbeamertemplate{navigation symbols}{}
+\usetikzlibrary{graphs}
+\usetikzlibrary{graphs.standard}
+\usetikzlibrary{automata,positioning}
+\usepackage{float}
+
+\begin{document}
+
+%\theoremstyle{dfn}
+\newtheorem{dfn}{Определение}[section]
+\newtheorem{nte}{Замечание}[section]
+
+\newtheorem{axiom}{Аксиома}[section]
+\newtheorem{thm}{Теорема}[section]
+\newtheorem{lmm}[theorem]{Лемма}
+\newtheorem{statement}{Утверждение}[section]
+\newtheorem{oun_paragraph}{Пункт}[section]
+\newtheorem{cons}{Следствие}[section]
+\newtheorem*{exm}{Пример}
+
+\newcommand{\comb}[1]{\operatorname{\mathcal{#1}}}
+\newcommand{\func}[1]{\operatorname{#1}}
+\newcommand{\reduction}[1]{{\color{OrangeRed}#1}}
+\newcommand{\set}[1]{\left\{#1\right\}}
+
+\def\from#1{\par \parbox{0.7\textwidth}{\par \hfill\raggedleft \it #1}} 
+
+\begin{frame}{}
+\begin{center}
+{\LARGE Объектно-ориентированное программирование и ТТ}
+\end{center}
+\end{frame}
+
+\begin{frame}{Отношение <<быть подтипом>>}
+\begin{dfn}
+Будем говорить, что $A$ --- подтип $B$: $$A <: B$$
+если значения типа $A$ --- часть множества значений типа $B$.
+\end{dfn}
+\begin{exm}
+\begin{itemize}
+\item В Java $\text{String} <: \text{Object}$.
+\item В Java $\text{int} \not<: \text{Integer}$.
+\end{itemize}
+\end{exm}
+\end{frame}
+
+\begin{frame}{Ко- и контравариантность}
+Определение взято из теории категорий (и упрощено):
+\begin{dfn}
+Пусть заданы два упорядоченных множества, $\langle C, < \rangle$ и $\langle D, < \rangle$.
+Ковариантное (контравариантное) отображение --- $f: C \rightarrow D$, что 
+\begin{itemize}
+\item при $x<y$ всегда $f(x) < f(y)$ (ковариантное отображение);
+\item при $x<y$ всегда $f(y) < f(x)$ (контравариантное отображение).
+\end{itemize}
+\end{dfn}
+\end{frame}
+
+\begin{frame}{Операции на типах}
+Пусть $g : \star \rightarrow \star$. Что можно сказать о его ко- или контравариантности?
+
+\begin{itemize}
+\item Функции ковариантны по результату: $g(\sigma) := \text{int}\rightarrow\sigma$. 
+
+Если $\alpha <: \beta$, $a : g(\alpha)$, $b : g(\beta)$ то $a(n): \alpha, b(n): \beta$, 
+поэтому функцию $b$ можно всегда заменить на $a$. Отсюда,
+$$\alpha <: \beta \text{ влечёт } g(\alpha) <: g(\beta)$$
+
+\item Функции контравариантны по аргументу: $g(\sigma) := \sigma\rightarrow\text{int}$. 
+
+Если $\alpha <: \beta$, $a : g(\alpha)$, $b : g(\beta)$, и $x : \alpha$ то
+$a(x)$ и $b(x)$ законны. Отсюда,
+
+$$\alpha <: \beta \text{ влечёт } g(\beta) <: g(\alpha)$$
+
+\item Массивы инвариантны: $g(\alpha) := \alpha[]$.
+
+С одной стороны, $g(\alpha).set : \alpha \rightarrow ()$, с другой стороны, $g(\alpha).get : \text{int} \rightarrow \alpha$.
+
+В Java массивы ковариантны, что приводит к проверке времени исполнения.
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Структурная и именная эквивалентность}
+\begin{verbatim}
+struct X { a: int, b: char } x;
+struct Y { a: int, b: char } y;
+\end{verbatim}
+
+Структурная эквивалентность: $X \approx Y$
+
+Именная эквивалентность: $X \not\approx Y$
+
+\end{frame}
+
+\begin{frame}{Исчисление $F_{<:}$}
+Язык:
+$$ T ::= x | \lambda x^\tau.T | T\ T | \lambda \alpha<:\tau.T| t\ \tau$$
+Типы:
+$$ \tau ::= \alpha|\top|\tau\rightarrow\tau|\forall\alpha<:\tau.\tau$$
+Подтипизация:
+$$\infer{\Gamma\vdash\sigma<:\sigma}{}\quad\quad\infer{\Gamma\vdash\sigma<:\tau}{\Gamma\vdash\sigma<:\rho\quad\quad\Gamma\vdash\rho<:\tau}\quad\quad\infer{\Gamma\vdash\sigma<:\top}{}$$
+$$\infer{\Gamma,\alpha<:\tau\vdash\alpha<:\tau}{}\quad\quad\infer{\Gamma\vdash\sigma_1\rightarrow\sigma_2<:\tau_1\rightarrow\tau_2}{\Gamma\vdash\tau_1\rightarrow\sigma_1\quad\quad\Gamma\vdash\sigma_2<:\tau_2}$$
+
+
+\end{frame}
+
+\begin{frame}{Исчисление $F_{<:}$}
+Типизация: правила системы $F$ со следующими добавлениями/изменениями
+$$\infer[\text{тип. абстракция}]{\Gamma\vdash\lambda\alpha<:\tau_1.T_2 : \forall \alpha<:\tau_1.\tau_2}{\Gamma,\alpha <: \tau_1 \vdash T_2 : \tau_2}$$
+$$\infer[\text{тип. применение}]{\Gamma\vdash T_1\ \tau_2 : \tau_{12}[\alpha := \tau_2]}{\Gamma,T_1 : \forall\alpha <: \tau_{11}.\tau_{12}\quad\quad\Gamma \vdash \tau_2 <: \tau_{11}}$$
+$$\infer[\text{приведение}]{\Gamma\vdash T:\tau}{\Gamma\vdash T:\sigma\quad\quad\Gamma\vdash\sigma<:\tau}$$
+\end{frame}
+
+\begin{frame}{Полное и ядерное правила}
+Ядерное правило подтипизации:
+$$\infer{\Gamma\vdash\forall\alpha<:\rho_1.\sigma_2<:\forall\alpha<:\rho_1.\tau_2}{\Gamma,\alpha<:\rho_1\vdash\sigma_2<:\tau_2}$$
+Полное правило подтипизации:
+$$\infer{\Gamma\vdash\forall\alpha<:\sigma_1.\sigma_2<:\forall\alpha<:\tau_1.\tau_2}{\Gamma\vdash\tau_1<:\sigma_1\quad\quad\Gamma,\alpha<:\tau_1\vdash\sigma_2<:\tau_2}$$
+\end{frame}
+
+\begin{frame}{Типизация для пар}
+Можно показать:
+$$\infer{\sigma_1\&\sigma_2 <: \tau_1\&\tau_2}{\Gamma\vdash\sigma_1<:\tau_1\quad\quad\Gamma\vdash\sigma_2<:\tau_2}$$
+\end{frame}
+
+\begin{frame}{Что такое класс/объект}
+\begin{itemize}
+\item Определим отношение подтипизации на кортежах --- это даст наследование.
+$$\text{struct }x_1 : \tau_1,\dots,x_n : \tau_n\text{ end} ::= \langle x_1 : \tau_1, \langle\dots\langle x_n : \tau_n, T : \top\rangle\rangle$$
+Упростим, убрав имена полей (не теряя общности):
+$$\text{struct }\tau_1,\dots,\tau_n\text{ end} ::= \tau_1\&\dots(\tau_n\&\top)$$
+%Можно показать, что:
+%$$\infer{\sigma_1\&\sigma_2 <: \tau_1\&\tau_2}{\Gamma\vdash\sigma_1<:\tau_1\quad\quad\Gamma\vdash\sigma_2<:\tau_2}$$
+Тогда $$\tau_n\&\tau_{n+1} <: \tau_n\&\top$$
+Отсюда, $$\text{struct }x_1 : \tau_1,\dots,x_n : \tau_n\text{ end} <: \text{struct }x_1 : \tau_1,\dots,x_{n-1} : \tau_{n-1}\text{ end}$$
+\item Приведения типов и т.п. получаются согласно общим правилам $F_{<:}$.
+\item По необходимости добавим экзистенциальные типы.
+\item При необходимости сделать именную эквивалентность из структурной можно, включив какие-нибудь токены в тип .
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Objective Caml}
+\begin{itemize}
+\item ML --- Meta Language, Робин Милнер, 1970е.
+\item Standard ML, 1983.
+\item Category Abstract Machine Language (Caml), 1985.
+\item ZINC project (ZINC Is Not CAML): ``Toplevels considered harmful'', Ксавье Леруа (Xavier Leroy), 1990.
+\item Objective Caml, 1996.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Объекты, классы, подтипы}
+\begin{itemize}
+\item Объектно-ориентированность --- набор различных конструкций, которые можно собирать по-разному.
+\item Объектно-ориентированность в Окамле собрана иначе, чем в Джаве или в Смолтоке.
+\item В Окамле есть две различных конструкции: модули (соответствуют абстрактным типам данных), 
+и объекты и классы (предназначены для построения иерархии наследования).
+\item Отношение подтипирования определено независимо от модулей и классов, в том числе и на обычных типах.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Полиморфный вариантный тип}
+Традиционный алгебраический тип не допускает пересечение вариантов:
+\begin{verbatim}
+type abc = A | B | C;;
+type ac = A | C;;             (* ac.C <> abc.C *)
+\end{verbatim}
+
+Однако, есть полиморфный вариантный тип:
+\begin{verbatim}
+type abc = [`A | `B | `C];;
+type ac = [`A | `C ];;
+\end{verbatim}
+
+Заметим, что $[>`A|`C] :> [>`A|`B|`C]$.
+
+\vspace{0.5cm}
+Автоматический вывод типов не может построить правильное подтипирование, но можно указать его явно:
+
+\begin{verbatim}
+let f a = `A;;                  (* f : 'a -> [> `A ] *)
+let g = (f () : ac);;           (* ошибка: у типа f() нет тэга `C *)
+let g = (f () : [`A] :> ac);;   (* g : ac, явное приведение типа *)
+\end{verbatim}
+\end{frame}
+
+\begin{frame}[fragile]{Модули: ковариантный интерфейс}
+\footnotesize
+\begin{verbatim}
+module type Writer = sig
+    type +'b t
+    val empty : unit -> 'b t
+    val push : 'b t -> 'b -> 'b t
+    val print_len : 'b t -> unit
+end
+
+module Writer : Writer = struct
+    type 'b t = 'b list
+    let empty () = []
+    let push l x = x :: l
+    let print_len l = print_int (List.length l)
+end
+
+let w = Writer.empty ();;
+let w = Writer.push w `A;;
+let w = Writer.push w `C;;
+let u = (w : [`A|`C] Writer.t :> [`A|`C|`E] Writer.t);;
+let u = Writer.push u `E;;
+\end{verbatim}
+%Writer.print_len u;;
+\end{frame}
+
+\begin{frame}[fragile]{Модули: контравариантный интерфейс}
+\footnotesize
+\begin{verbatim}
+module type Counter = sig
+    type -'b t
+    val empty : ('b->int->int) -> 'b t
+    val push : 'b t -> 'b -> 'b t
+    val print_len : 'b t -> unit
+end
+
+module Counter : Counter = struct
+    type 'b t = int * ('b->int->int)
+    let empty f = (0,f)
+    let push (l,f) x = (f x l, f)
+    let print_len (l,f) = print_int l
+end
+
+let w = Counter.empty (fun x l -> l + match x with `A -> 0 | `B -> 1 | `C -> 2);;
+let w = Counter.push w `A;;
+let w = Counter.push w `C;;
+let u = (w : [`A|`C] Counter.t :> [`A] Counter.t);; (* однако, [`A] :> [`A|`C] *)
+let u = Counter.push u `A;;
+\end{verbatim}
+%Counter.print_len u;;
+\end{frame}
+
+\begin{frame}[fragile]{Объекты}
+Зададим объект:
+
+\footnotesize
+\begin{verbatim}
+type square = < area : float; width : int >;;
+
+let square w = object
+  method area = Float.of_int (w * w)
+  method width = w
+end;;
+\end{verbatim}
+
+\normalsize
+И нечто общее:
+
+\footnotesize
+\begin{verbatim}
+let coin = object
+  method shape = circle 5
+  method color = "silver"
+end;;
+
+let map = object
+  method shape = square 10
+end;;
+
+type item = < shape : shape >;;
+let items = [ (coin :> item) ; (map :> item) ];;
+\end{verbatim}
+\end{frame}
+
+\begin{frame}{Формализация: подтипы}
+\begin{itemize}
+\item ``Быть подтипом'' определяется рекурсивно --- согласно структуре.
+\item Приведение типа:
+$$\infer{\Gamma\vdash(\alpha: \tau<:\tau'):\theta(\tau')}{\tau <: \tau'\quad\quad\Gamma\vdash\alpha:\theta(\tau)}$$
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Формализация: экзистенциальные типы и модули}
+\begin{itemize}
+\item 
+\begin{verbatim}
+module type Counter = sig
+    type -'b t
+    val empty : ('b->int->int) -> 'b t
+    ...
+end
+\end{verbatim}
+То есть, $\exists \beta.E : (\beta\rightarrow N \rightarrow N) \rightarrow \tau(\beta)$
+\item Заменим экзистенциальный тип (интерфейс модуля) на его каноническое представление:
+$(B\rightarrow N \rightarrow N)\rightarrow \tau(B)$
+\item Правила подтипирования для типа, на основании его канонического представления:
+$$ \infer{\Gamma\vdash\exists\alpha.R <: \exists\alpha'.R}{\Gamma,\alpha\vdash R<: R'[\alpha':=\tau]}$$
+\end{itemize}
+\end{frame}
+
+\end{document}
