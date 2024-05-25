@@ -127,7 +127,7 @@ $$ T ::= x | \lambda x^\tau.T | T\ T | \lambda \alpha<:\tau.T| t\ \tau$$
 $$ \tau ::= \alpha|\top|\tau\rightarrow\tau|\forall\alpha<:\tau.\tau$$
 Подтипизация:
 $$\infer{\Gamma\vdash\sigma<:\sigma}{}\quad\quad\infer{\Gamma\vdash\sigma<:\tau}{\Gamma\vdash\sigma<:\rho\quad\quad\Gamma\vdash\rho<:\tau}\quad\quad\infer{\Gamma\vdash\sigma<:\top}{}$$
-$$\infer{\Gamma,\alpha<:\tau\vdash\alpha<:\tau}{}\quad\quad\infer{\Gamma\vdash\sigma_1\rightarrow\sigma_2<:\tau_1\rightarrow\tau_2}{\Gamma\vdash\tau_1\rightarrow\sigma_1\quad\quad\Gamma\vdash\sigma_2<:\tau_2}$$
+$$\infer{\Gamma,\alpha<:\tau\vdash\alpha<:\tau}{}\quad\quad\infer{\Gamma\vdash\sigma_1\rightarrow\sigma_2<:\tau_1\rightarrow\tau_2}{\Gamma\vdash\tau_1<:\sigma_1\quad\quad\Gamma\vdash\sigma_2<:\tau_2}$$
 
 
 \end{frame}
@@ -135,7 +135,7 @@ $$\infer{\Gamma,\alpha<:\tau\vdash\alpha<:\tau}{}\quad\quad\infer{\Gamma\vdash\s
 \begin{frame}{Исчисление $F_{<:}$}
 Типизация: правила системы $F$ со следующими добавлениями/изменениями
 $$\infer[\text{тип. абстракция}]{\Gamma\vdash\lambda\alpha<:\tau_1.T_2 : \forall \alpha<:\tau_1.\tau_2}{\Gamma,\alpha <: \tau_1 \vdash T_2 : \tau_2}$$
-$$\infer[\text{тип. применение}]{\Gamma\vdash T_1\ \tau_2 : \tau_{12}[\alpha := \tau_2]}{\Gamma,T_1 : \forall\alpha <: \tau_{11}.\tau_{12}\quad\quad\Gamma \vdash \tau_2 <: \tau_{11}}$$
+$$\infer[\text{тип. применение}]{\Gamma\vdash T_1\ \tau_2 : \tau_{12}[\alpha := \tau_2]}{\Gamma\vdash T_1 : \forall\alpha <: \tau_{11}.\tau_{12}\quad\quad\Gamma \vdash \tau_2 <: \tau_{11}}$$
 $$\infer[\text{приведение}]{\Gamma\vdash T:\tau}{\Gamma\vdash T:\sigma\quad\quad\Gamma\vdash\sigma<:\tau}$$
 \end{frame}
 
