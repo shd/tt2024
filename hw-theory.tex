@@ -980,15 +980,15 @@ $$T(A) := \exists a_1,\dots,a_k \in \mathbb{N}.A_i = X_i\text{, если }i \not
 \item Определите тип <<множество элементов из сета $S$>> вместе с операцией $\in$ и отображением $P(Set\ S)$, задающим множество всех подмножеств. 
 Покажите выполненость следующих аналогов конструктивных аксиом $ZF$:
 \begin{enumerate}
-\item Покажите, что для $a,b \in Set\ S$ выполнено $a = b$ тогда и только тогда, когда они состоят из одинаковых элементов ($\forall x:S.x \in a \rightarrow x \in b$).
-\item Аксиома пары: если $p,q \in Set\ S$, то $\{p,q\} \in P(Set S)$.
-\item Аксиома объединения: если $\forall i.p(i) \in Set\ S$, то $\cup_i p(i) \in Set\ S$.
-\item Аксиома выделения: если $s \in Set\ S$ и $p : S \rightarrow \text{Prop}$, то $\{ x\in s | p(x)\} \in Set S$.
+\item Покажите, что для $a,b : Set\ S$ выполнено $a = b$ тогда и только тогда, когда они состоят из одинаковых элементов ($\forall x:S.x \in a \rightarrow x \in b$).
+\item Аксиома пары: если $p,q : Set\ S$, то $\{p,q\} : P(Set S)$.
+\item Аксиома объединения: если $\forall i.p(i) \in Set\ S$, то $\cup_i p(i) : Set\ S$.
+\item Аксиома выделения: если $s : Set\ S$ и $p : S \rightarrow \text{Prop}$, то $\{ x\in s | p(x)\} : Set S$.
 \item Выполнена ли аксиома выбора для таких множеств?
 \item Пусть $p,q: Set\ S \rightarrow \text{Prop}$. Всегда ли $p(x) = p(y)$ эквивалентно $x=y$? Чего не хватает в определении, если не всегда?
-\item Пусть $p: S \rightarrow \text{Prop}$ и пусть $A,B \in Set\ S$. Определите конструкцию $\bigvee_{x \in X^{Set\ S}}$ и 
+\item Пусть $p: S \rightarrow \text{Prop}$ и пусть $A,B : Set\ S$. Определите конструкцию $\bigvee_{x \in X^{Set\ S}}$ и 
 покажите, что $\bigvee_{x \in A} p(x) \vee \bigvee_{x \in B} p(x)$ влечёт $\bigvee_{x\in A\cup B} p(x)$. 
-\item Пусть $p: S \rightarrow \text{Prop}$ и пусть $A,B \in Set\ S$. Покажите, что если $\bigvee_{x\in A\cup B} p(x)$, то $\bigvee_{x \in A} p(x) \vee \bigvee_{x \in B} p(x)$.
+\item Пусть $p: S \rightarrow \text{Prop}$ и пусть $A,B : Set\ S$. Покажите, что если $\bigvee_{x\in A\cup B} p(x)$, то $\bigvee_{x \in A} p(x) \vee \bigvee_{x \in B} p(x)$.
 Можете ли вы это показать как для \verb!||!, так и для \verb!Data.Or!?
 \end{enumerate}
 
