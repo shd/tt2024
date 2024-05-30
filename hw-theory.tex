@@ -985,7 +985,8 @@ $$T(A) := \exists a_1,\dots,a_k \in \mathbb{N}.A_i = X_i\text{, если }i \not
 \item Аксиома объединения: если $\forall i.p(i) \in Set\ S$, то $\cup_i p(i) : Set\ S$.
 \item Аксиома выделения: если $s : Set\ S$ и $p : S \rightarrow \text{Prop}$, то $\{ x\in s | p(x)\} : Set S$.
 \item Выполнена ли аксиома выбора для таких множеств?
-\item Пусть $p,q: Set\ S \rightarrow \text{Prop}$. Всегда ли $p(x) = p(y)$ эквивалентно $x=y$? Чего не хватает в определении, если не всегда?
+\item Пусть $A,B : Set\ S$. Верно ли, что $\forall p: Set\ S \rightarrow \text{Prop}.p(A) \leftrightarrow p(B)$ эквивалентно $A=B$?
+Возможно ли доказать $p(A)=p(B)$ при $A=B$ (например, при помощи аксиомы унивалентности)?
 \item Пусть $p: S \rightarrow \text{Prop}$ и пусть $A,B : Set\ S$. Определите конструкцию $\bigvee_{x \in X^{Set\ S}}$ и 
 покажите, что $\bigvee_{x \in A} p(x) \vee \bigvee_{x \in B} p(x)$ влечёт $\bigvee_{x\in A\cup B} p(x)$. 
 \item Пусть $p: S \rightarrow \text{Prop}$ и пусть $A,B : Set\ S$. Покажите, что если $\bigvee_{x\in A\cup B} p(x)$, то $\bigvee_{x \in A} p(x) \vee \bigvee_{x \in B} p(x)$.
@@ -995,10 +996,6 @@ $$T(A) := \exists a_1,\dots,a_k \in \mathbb{N}.A_i = X_i\text{, если }i \not
 \item Определите тип <<неориентированный граф из $n$ вершин>>. Покажите следующие утверждения:
 \begin{enumerate}
 \item В полном графе без петель $\frac{n\cdot(n-1)}{2}$ дуг.
-\item В любом связном графе не меньше $n-1$ дуги.
-\item В дереве (связный граф без циклов) $n-1$ дуга.
-\item В дереве каждые две вершины соединены единственным путём.
-\item Дерево --- максимальный ациклический граф.
 \end{enumerate}
 
 \item Определите импликативную решётку на основе дистрибутивной (из стандартной библиотеки) и покажите следующее:
@@ -1010,6 +1007,35 @@ $$T(A) := \exists a_1,\dots,a_k \in \mathbb{N}.A_i = X_i\text{, если }i \not
 \item Покажите, что модель Крипке задаёт импликативную решётку.
 \item Покажите, что если $G$ --- алгебра Гейтинга, то $\Gamma(G)$ --- также алгебра Гейтинга.
 \item Покажите, что $\Gamma(G)$ --- гёделева.
+\end{enumerate}
+
+\item Задачи на перечисление элементов и неравенства.
+\begin{enumerate}
+\item Покажите, что $\forall a \in \mathbb{N}. \forall x \in \mathbb{N}. a < x \& x < a + 3 \rightarrow x = a +1 \vee x =a +2$
+\item Определим множественное равенство:
+\begin{verbatim}
+\func P (N : Nat) (x : Nat) : \Prop \elim N
+  | 0 => 0 = x
+  | suc N => P N x || (suc N = x)
+\end{verbatim}
+
+Покажите, что $x < a$ тогда и только тогда, когда $P\ a\ x$.
+\end{enumerate}
+
+\item Докажите, что число 239 не является гёделевым номером никакой строки. Напомним, $n$ --- гёделев номер строки $s_1\dots s_n$, если 
+$n = 2^{\ulcorner s_1 \urcorner}\cdot 3^{\ulcorner s_2 \urcorner} \dots$. Лишние множители присутствовать в номере не должны.
+
+\item Ещё несколько фактов про импликативные решётки (баллы начисляются за пронумерованное буквой задание, выполненное целиком):
+\begin{enumerate}
+\item (i) \emph{монотонность:} пусть $a \preceq b$ и $c \preceq d$, тогда $a + c \preceq b + d$ и $a \cdot c \preceq b \cdot d$;
+(ii) \emph{законы поглощения:} $a \cdot (a + b) = a$; $a + (a \cdot b) = a$; 
+(iii) $a \preceq b$ выполнено тогда и только тогда, когда $a \rightarrow b = 1$;
+\item (i) из $a \preceq b$ следует $b\rightarrow c \preceq a\rightarrow c$ и $c\rightarrow a \preceq c \rightarrow b$;
+ (ii) из $a \preceq b \rightarrow c$ следует $a \cdot b \preceq c$;
+\item (i) $b \preceq a \rightarrow b$ и $a \rightarrow (b \rightarrow a) = 1$;
+ (ii) $a \rightarrow b \preceq ((a \rightarrow (b \rightarrow c)) \rightarrow (a \rightarrow c))$;
+\item  (i) $a \preceq b \rightarrow a \cdot b$ и $a \rightarrow (b \rightarrow (a \cdot b)) = 1$;
+ (ii) $a \rightarrow c \preceq (b \rightarrow c) \rightarrow (a + b \rightarrow c)$
 \end{enumerate}
 \end{enumerate}
 
@@ -1035,11 +1061,16 @@ $$T(A) := \exists a_1,\dots,a_k \in \mathbb{N}.A_i = X_i\text{, если }i \not
 
 \item (15 баллов) Определите свойство графа <<быть планарным>> и покажите формулу Эйлера для него.
 
+\item (15 баллов) Покажите, что в любом связном графе не меньше $n-1$ дуги.
+В дереве (связный граф без циклов) $n-1$ дуга.
+В дереве каждые две вершины соединены единственным путём.
+
 \item (15 баллов) Покажите, что алгоритм Дейкстры на ориентированном графе действительно возвращает кратчайший путь. Рёбра в графе для простоты
 пусть имеют вес 0 (отсутствует) или 1 (в наличии). Действия алгоритма Дейкстры, возможно, разумнее всего записывать в каком-то специально
 построенном типе для записи шагов алгоритма (сами структуры данных каждого шага плюс утверждения про эти шаги).
 
 \item (15 баллов) Докажите, что гомоморфный образ группы изоморфен фактор-группе по ядру гомоморфизма.
+
 
 \end{enumerate}
 
