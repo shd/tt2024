@@ -380,7 +380,7 @@ $\text{path }f : a = a'$ означает, что $\text{path }f:\text{Path}\ A\
 \small\color[HTML]{025002}\begin{verbatim}\func eq-transitive {A : \Type} {a a' a'' : A}
                     (f : a = a')
                     (g : a' = a'') : a = a'' =>
-  transport (\lam x => a = x) f right
+  transport (\lam x => a = x) g f
 \end{verbatim}\normalsize
 \color{black}
 
